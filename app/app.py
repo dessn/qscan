@@ -1,8 +1,10 @@
 import logging
 import pymongo
+import config
+from forms import UserForm
 from flask import Flask, g, render_template, request
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path = 'static/')
 
 @app.before_first_request
 def configure_logging() :
@@ -19,4 +21,13 @@ def mongodb_connection() :
     requires access to the database must come after this.
     Defines: g.dbi."""
     
-    g.dbi = DBI()
+    g.dbi = pymongo.MongoClient(config.MONGODB_RW_URI)
+
+
+@app.route("/")
+def index():
+    
+    return render_template("login.html")
+
+
+@app.route("
