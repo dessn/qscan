@@ -1,7 +1,8 @@
-from wtforms import TextField, PasswordField, SubmitField, BooleanField, validators, ValidationError
-from sqlalchemy import or_
+from wtforms import TextField, SubmitField, validators
 from flask.ext.wtf import Form
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from db import User
-import pdb
+
+class UserForm(Form):
+    """Form for signing up to scan."""
+
+    user = TextField('user', [validators.Required()])
+    submit = SubmitField('submit')
