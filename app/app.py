@@ -33,6 +33,27 @@ login_manager.init_app(app)
 login_manager.session_protection = None
 login_manager.login_view = "login"
 
+# Use an object-relational mapper to serve as a proxy between flask
+# and MongoDB.
+
+app.config['MONGOALCHEMY_DATABASE'] = config.MONGODB_DBNAME
+db = MongoAlchemy(app)
+
+class User(db.Document):
+    username = db.StringField()
+
+class ScanObject(db.Document):
+    snobjid = db.IntField()
+
+    # Reference to User object
+    scanner = db.ObjectIdField()
+
+    # 0 = Bogus, 1 = Real
+    decision = db.EnumField(db.IntField(), 0, 1)
+    
+    # Automatically logs the date and time that the document was
+    # entered into the DB.
+    scandate = db.CreatedField() 
 
 #Define user_loader callback so user information can be obtained from userid
 @login_manager.user_loader        
