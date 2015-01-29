@@ -9,9 +9,14 @@ __copyright__ = 'Copyright 2014, Danny Goldstein'
 
 import logging
 
-import pymongo # I write to a MongoDB.
+import pymongo # I write to a MongoDB...
+from flask.ext.mongoalchemy import MongoAlchemy # ...using an ORM.
+
 import cx_Oracle # I read from an Oracle database.
-import config # I store DB connection info in the `config` module. 
+import config # I store DB connection info in the `config` module.
+
+from flask.ext.bootstrap import Bootstrap # I use bootstrap to look
+                                          # sharp. 
 
 from forms import UserForm
 from flask import Flask, g, render_template, request
@@ -54,6 +59,12 @@ class ScanObject(db.Document):
     # Automatically logs the date and time that the document was
     # entered into the DB.
     scandate = db.CreatedField() 
+
+# Give templates easy access to Twitter bootstrap with
+# flask-bootstrap.
+
+bootstrap = Bootstrap(app) 
+
 
 #Define user_loader callback so user information can be obtained from userid
 @login_manager.user_loader        
