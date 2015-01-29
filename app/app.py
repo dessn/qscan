@@ -8,20 +8,26 @@ __version__ = '0.0.1'
 __copyright__ = 'Copyright 2014, Danny Goldstein'
 
 import logging
-import pymongo
-import cx_Oracle
-import config
+
+import pymongo # I write to a MongoDB.
+import cx_Oracle # I read from an Oracle database.
+import config # I store DB connection info in the `config` module. 
+
 from forms import UserForm
 from flask import Flask, g, render_template, request
 
 app = Flask(__name__, static_url_path = 'static/')
-
-# set secret key in order to use session
-app.secret_key = '\xfdV\xb7\xb2\xacQgf\xa3W\xad\xd3\xdd\x12\xd9 \x0cPR4\x9b\xb1iM'
-#Set so we don't need to reload the app every time we make a change
 app.debug = True
 
-#Configure login 
+# We want to keep track of who has scanned what.  We do this using
+# flask sessions.  Sessions are like cookies, but they are signed
+# cryptographically with a secret key to prevent client-side
+# modification.
+
+app.secret_key = '\xfdV\xb7\xb2\xacQgf\xa3W\xad\xd3\xdd\x12\xd9 '\
+                 '\x0cPR4\x9b\xb1iM'
+
+#
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.session_protection = None
