@@ -9,10 +9,9 @@ __copyright__ = 'Copyright 2014, Danny Goldstein'
 
 import logging
 
-import pymongo # I write to a MongoDB...
-from flask.ext.mongoalchemy import MongoAlchemy # ...using an ORM.
+from flask.ext.mongoalchemy import MongoAlchemy # I write to and read a MongoDB using an ORM.
+from flask.ext.sqlalchemy import SQLAlchemy # I read an OracleDB using an ORM.
 
-import cx_Oracle # I read from an Oracle database.
 import config # I store DB connection info in the `config` module.
 
 from flask.ext.bootstrap import Bootstrap # I use bootstrap to look
@@ -32,14 +31,13 @@ app.debug = True
 app.secret_key = '\xfdV\xb7\xb2\xacQgf\xa3W\xad\xd3\xdd\x12\xd9 '\
                  '\x0cPR4\x9b\xb1iM'
 
-#
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.session_protection = None
 login_manager.login_view = "login"
 
-# Use an object-relational mapper to serve as a proxy between flask
-# and MongoDB.
+# Setup the object-relational mapper that serves as a proxy between
+# flask and MongoDB.
 
 app.config['MONGOALCHEMY_DATABASE'] = config.MONGODB_DBNAME
 db = MongoAlchemy(app)
@@ -67,6 +65,7 @@ bootstrap = Bootstrap(app)
 
 
 #Define user_loader callback so user information can be obtained from userid
+
 @login_manager.user_loader        
 def load_scanner(scanner_id):
     """Query database with user_id, create User object with info from query result
@@ -81,9 +80,6 @@ def load_scanner(scanner_id):
     session['logged_in']=True
     return user
 
-def set_session_key(key, value):
-    """Use to set a session key or value"""
-    session[key] = value
 
 @app.before_first_request
 def configure_logging() :
@@ -137,12 +133,15 @@ def gifurl_fmtstr(snobjid):
     urlbase     = 'http://dessne.cosmology.illinois.edu/SNWG/stamps/stamps_Y2'
     fmtstr_base = '%s/{nite}-r{reqnum}/D_SN-{field}_{band}_s{seqnum}/p{attnum}'\
                   '/ccd{ccdnum}/stamps/{type}{snobjid}.fits' % urlbase
-    fmtstr      = fmtstr_base.format(**dict(zip(colnames, result)))    
+    fmtstr      = fmtstr_base.format(**rdict)
     return fmtstr
 
 @login_required
 @app.route("/scan")
 def scan():
+
+    
+    
     user, g.dbi
 
     # get unscanned stuff
