@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+__author__ = 'Danny Goldstein <dgold@berkeley.edu>'
+__whatami__ = 'Flask server backend for qscan, a web application that '\
+              'allows one to quickly scan detections of DES SN candidates.'
+__version__ = '0.0.1'
+__copyright__ = 'Copyright 2014, Danny Goldstein'
+
 import logging
 import pymongo
 import cx_Oracle
@@ -7,7 +16,7 @@ from flask import Flask, g, render_template, request
 
 app = Flask(__name__, static_url_path = 'static/')
 
-#set secret key in order to use session
+# set secret key in order to use session
 app.secret_key = '\xfdV\xb7\xb2\xacQgf\xa3W\xad\xd3\xdd\x12\xd9 \x0cPR4\x9b\xb1iM'
 #Set so we don't need to reload the app every time we make a change
 app.debug = True
@@ -58,57 +67,40 @@ def db_connection() :
 
 @app.route("/")
 def index():
-    login_form
+    login_form 
     return render_template("login.html", form=)
 
+def gifurl_fmtstr(snobjid):
+    """Generate a format string with a %s field that can be replaced with
+    the 'srch', 'temp', or 'diff' to yield the URL of stamp gifs at 
+    NCSA.
 
-def generate_links(snobjid, season):
-    """Return a dictionary containing links to the gifs of an
-    snobjid."""
+    FIXME: Currently only works for Y2.
+    """
     
-    cursor = y2prod()
+    # Query below from JF.
 
-    # following query from john fischer
-    # i modify it here slightly
-
+    colnames = ['snobjid', 'expnum', 'nite', 'mjd',
+                'field', 'ccdnum', 'band', 'seqnum',
+                'reqnum', 'attnum']
+    
     query = 'select distinct o.SNOBJID, o.EXPNUM, o.NITE, o.MJD, '\
             'o.field, o.ccdnum, o.band, lsub.SEQNUM, lsub.REQNUM, '\
             'lsub.ATTNUM from snobs o JOIN TASK on o.TASK_ID=TASK.ID '\
             'JOIN LATEST_SNSUBMIT lsub on lsub.TASK_ID=TASK.ROOT_TASK_ID '\
             'where o.STATUS>=0 and o.SNOBJID = :objid'
-    
-    path_list = list()
-    
-    for snobjid in snobjid_list:
-        cursor.execute(query, objid=int(snobjid))
-        names = zip(*cursor.description)[0]
-        result = np.squeeze(np.array(cursor.fetchall(),
-                                     dtype={'names':[name.lower() for name in names],
-                                            'formats':convert(cursor.description)}))
-        if result.shape != ():
-            raise Exception, 'Multiple stamp paths found for %d:\n\t%s' % (snobjid, result)
-        
-        base = '{preprefix}/{nite}-r{reqnum}/D_SN-{field}_{band}_s{seqnum}/p{attnum}'\
-                                                                                                                          '/ccd{ccdnum}/stamps/{type}{snobjid}.fits'
-                                                                                                            triplet = list()
-                                                                                                            for type in ['srch','temp','diff']:
-                                                                                                                            kwargs = dict()
-                                                                                                                            for name in result.dtype.names:
-                                                                                                                                                kwargs[name] = result[name]
-                                                                                                                                                            kwargs['type'] = type
-                                                                                                                                                            if kwargs['ccdnum'] < 10:
-                                                                                                                                                                                kwargs['ccdnum'] = '0%d' % kwargs['ccdnum']
-                                                                                                                                                                                if kwargs['attnum'] < 10:
-                                                                                                                                                                                                    kwargs['attnum'] = '0%d' % kwargs['attnum']
-                                                                                                                                                                                                                kwargs['preprefix'] = '/home2/SNWG/stamps/stamps_Y2' if local else \
-                                                                                                                                                                                                                                                                        'http://dessne.cosmology.illinois.edu/SNWG/stamps/stamps_Y2'
-                                                                                                                                                                                                                            triplet.append(base.format(**kwargs))
-                                                                                                                                                                                                                                    path_list.append(triplet)
 
-                                                                                                                                                                                                                                                cursor.close()
-                                                                                                                                                                                                                                                    return path_list
-                                                                                                                                                                                                                                                
-    
+    g.oracle_dbi.execute(query, objid=snobjid)
+    rdict = dict(zip(colnames, g.oracle_dbi.fetchone()))
+
+    if rdict['ccdnum'] < 10:
+        rdict['ccdnum'] = '0%d' % rdict['ccdnum']
+
+    urlbase     = 'http://dessne.cosmology.illinois.edu/SNWG/stamps/stamps_Y2'
+    fmtstr_base = '%s/{nite}-r{reqnum}/D_SN-{field}_{band}_s{seqnum}/p{attnum}'\
+                  '/ccd{ccdnum}/stamps/{type}{snobjid}.fits' % urlbase
+    fmtstr      = fmtstr_base.format(**dict(zip(colnames, result)))    
+    return fmtstr
 
 @login_required
 @app.route("/scan")
@@ -116,3 +108,5 @@ def scan():
     user, g.dbi
 
     # get unscanned stuff
+
+    
