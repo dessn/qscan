@@ -34,7 +34,7 @@ jQuery(document).ready(function() {
   
   $(".panel").click(function() {
     $.post($SCRIPT_ROOT + '/register_scan',
-	   {snobjid: int($(this).children('.panel-info')
+	   {snobjid: int($(this).find('.panel-title')
 			 .first().text())}
 	   function(data){
 	     if (data.result){
