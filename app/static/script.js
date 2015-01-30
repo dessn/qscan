@@ -32,13 +32,13 @@ jQuery(document).ready(function() {
   
   // Log scanning decisions. 
   
-  $(".scanobj-container").click(function() {
+  $(".panel").click(function() {
     $.post($SCRIPT_ROOT + '/register_scan',
 	   {snobjid: int($(this).children('.panel-info')
 			 .first().text())}
 	   function(data){
 	     if (data.result){
-	       $(this).toggleClass("clicked");
+	       $(this).toggleClass("focus");
 	     }		       
 	   });
   });

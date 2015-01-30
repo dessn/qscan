@@ -1,26 +1,37 @@
 body {
-	padding-bottom: 40px;
+    padding-bottom: 40px;
     padding-top: 60px;
 }
 
 #pages {
-	display: none;
+    display: none;
 }
 
 .img {
-	width: 100%;
-	height: 200px;
-	background-color: #EEEEEE;
+    width: 100%;
+    height: 200px;
+    background-color: #EEEEEE;
 }
 
 #loader {
-	display: none;
-	position: fixed;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-	text-align: left;
-	opacity: .8;
-	background-color: #FFFFFF;
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    opacity: .8;
+    background-color: #FFFFFF;
+}
+
+.panel {
+    margin: 0;
+    transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
+}
+
+.panel.focus {
+    border-color: #66AFE9;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6);
+    outline: 0 none;
 }
