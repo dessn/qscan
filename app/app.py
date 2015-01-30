@@ -28,7 +28,7 @@ app.debug = True
 
 bootstrap = Bootstrap(app) 
 
-# Open a MongoDB request before each request. 
+# Open a MongoDB connection before each request. 
 
 @app.before_request
 def create_mongoclient():
@@ -51,14 +51,17 @@ def configure_logging() :
     app.logger.addHandler( handler )
     app.logger.setLevel( logging.DEBUG )
 
-# Number of objects to fetch during AJAX calls and when index is loaded. 
-N_FETCH = 10
-
-def fetch():
+def fetch(n_fetch=10):
     
-    """Return the format string of N_FETCH unscanned objects.  On the
+    """Return the format string of N_FETCH unviewed objects.  On the
     backend, initialize them by setting their status to viewed, but
-    not saved."""
+    not saved.
+    
+    Parameters:
+    -----------
+    n_fetch: int, default=10. 
+        Number of objects to fetch.
+    """
 
     object_collection = getattr(g.db, 
                                 config.MONGODB_OBJECT_COLLECTION_NAME)
@@ -68,8 +71,8 @@ def fetch():
     # Get objects to scan.
     new_objects = scan_collection.find({'scanned':False})
 
-    # Once objects are loaded, their "scanned" field is set to 0,
-    # meaning they were looked at, but not saved.
+    # Once objects are loaded, initialize their "scanned" field to 0.
+    # This means they were looked at, but not saved.
     for obj in new_objects:
         obj['scanned'] = 0
     scan_collection.update(new_objects)
