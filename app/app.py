@@ -1,85 +1,48 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__author__ = 'Danny Goldstein <dgold@berkeley.edu>'
-__whatami__ = 'Flask server backend for qscan, a web application that '\
-              'allows one to quickly scan detections of DES SN candidates.'
-__version__ = '0.0.1'
+__author__    = 'Danny Goldstein <dgold@berkeley.edu>'
+__whatami__   = 'Flask server backend for qscan, a mobile-first web application'\
+                'that allows one to quickly scan detections of DES SN candidates.'
+__version__   = '0.0.1'
 __copyright__ = 'Copyright 2014, Danny Goldstein'
 
+# Import Statements
+
+# Database interaction occurs exclusively with a MongoDB at NERSC.  DB
+# connection info is stored in the `qscan.config` module, and form
+# classes are stored in the `qscan.forms` module. Flask-bootstrap
+# keeps the website looking sharp.
+
 import logging
-
-from flask.ext.mongoalchemy import MongoAlchemy # I write to and read a MongoDB using an ORM.
-from flask.ext.sqlalchemy import SQLAlchemy # I read an OracleDB using an ORM.
-
-import config # I store DB connection info in the `config` module.
-
-from flask.ext.bootstrap import Bootstrap # I use bootstrap to look
-                                          # sharp. 
-
-from forms import UserForm
+import pymongo 
+from qscan import config, forms 
+from flask.ext.bootstrap import Bootstrap
 from flask import Flask, g, render_template, request
+
+# Application Creation + Configuration
 
 app = Flask(__name__, static_url_path = 'static/')
 app.debug = True
-
-# We want to keep track of who has scanned what.  We do this using
-# flask sessions.  Sessions are like cookies, but they are signed
-# cryptographically with a secret key to prevent client-side
-# modification.
-
-app.secret_key = '\xfdV\xb7\xb2\xacQgf\xa3W\xad\xd3\xdd\x12\xd9 '\
-                 '\x0cPR4\x9b\xb1iM'
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.session_protection = None
-login_manager.login_view = "login"
-
-# Setup the object-relational mapper that serves as a proxy between
-# flask and MongoDB.
-
-app.config['MONGOALCHEMY_DATABASE'] = config.MONGODB_DBNAME
-db = MongoAlchemy(app)
-
-class User(db.Document):
-    username = db.StringField()
-
-class ScanObject(db.Document):
-    snobjid = db.IntField()
-
-    # Reference to User object
-    scanner = db.ObjectIdField()
-
-    # 0 = Bogus, 1 = Real
-    decision = db.EnumField(db.IntField(), 0, 1)
-    
-    # Automatically logs the date and time that the document was
-    # entered into the DB.
-    scandate = db.CreatedField() 
 
 # Give templates easy access to Twitter bootstrap with
 # flask-bootstrap.
 
 bootstrap = Bootstrap(app) 
 
+# Open a MongoDB request before each request. 
 
-#Define user_loader callback so user information can be obtained from userid
+@app.before_request
+def create_mongoclient():
+    g.db = pymongo.MongoClient(config.MONGODB_RW_URI)
 
-@login_manager.user_loader        
-def load_scanner(scanner_id):
-    """Query database with user_id, create User object with info from query result
-    and return the User object"""
-    
-    #Cast user_id to int for query
-    user_id = int(user_id)
-    userresult = User.query.filter(User.id==user_id)
-    user = userresult.first()
+# And tear it down afterwards.
 
-    #For use in templates
-    session['logged_in']=True
-    return user
-
+@app.teardown_reqeuest
+def destroy_mongoclient():
+    db = getattr(g, db, None)
+    if db is not None:
+        db.close()
 
 @app.before_first_request
 def configure_logging() :
@@ -90,60 +53,15 @@ def configure_logging() :
     app.logger.addHandler( handler )
     app.logger.setLevel( logging.DEBUG )
 
-@app.before_request
-def db_connection() :
-    """Prepare the MongoDB client and database objects.  Any preprocessing that
-    requires access to the database must come after this.
-    Defines: g.dbi."""
-    
-    g.dbi = pymongo.MongoClient(config.MONGODB_RW_URI)
-    g.oracle_dbi = cx_Oracle.connect(config.ORACLE_URI, threaded=True).cursor()
-
 @app.route("/")
 def index():
-    login_form 
+    object_collection = getattr(g.db, 
+                                config.MONGODB_OBJECT_COLLECTION_NAME)
+    scan_collection   = getattr(g.db,
+                                config.MONGODB_SCAN_COLLECTION_NAME)
+    
+    # Get 100 objects to scan.
+    
+    
     return render_template("login.html", form=)
-
-def gifurl_fmtstr(snobjid):
-    """Generate a format string with a %s field that can be replaced with
-    the 'srch', 'temp', or 'diff' to yield the URL of stamp gifs at 
-    NCSA.
-
-    FIXME: Currently only works for Y2.
-    """
-    
-    # Query below from JF.
-
-    colnames = ['snobjid', 'expnum', 'nite', 'mjd',
-                'field', 'ccdnum', 'band', 'seqnum',
-                'reqnum', 'attnum']
-    
-    query = 'select distinct o.SNOBJID, o.EXPNUM, o.NITE, o.MJD, '\
-            'o.field, o.ccdnum, o.band, lsub.SEQNUM, lsub.REQNUM, '\
-            'lsub.ATTNUM from snobs o JOIN TASK on o.TASK_ID=TASK.ID '\
-            'JOIN LATEST_SNSUBMIT lsub on lsub.TASK_ID=TASK.ROOT_TASK_ID '\
-            'where o.STATUS>=0 and o.SNOBJID = :objid'
-
-    g.oracle_dbi.execute(query, objid=snobjid)
-    rdict = dict(zip(colnames, g.oracle_dbi.fetchone()))
-
-    if rdict['ccdnum'] < 10:
-        rdict['ccdnum'] = '0%d' % rdict['ccdnum']
-
-    urlbase     = 'http://dessne.cosmology.illinois.edu/SNWG/stamps/stamps_Y2'
-    fmtstr_base = '%s/{nite}-r{reqnum}/D_SN-{field}_{band}_s{seqnum}/p{attnum}'\
-                  '/ccd{ccdnum}/stamps/{type}{snobjid}.fits' % urlbase
-    fmtstr      = fmtstr_base.format(**rdict)
-    return fmtstr
-
-@login_required
-@app.route("/scan")
-def scan():
-
-    
-    
-    user, g.dbi
-
-    # get unscanned stuff
-
     
