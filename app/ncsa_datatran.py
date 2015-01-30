@@ -18,7 +18,7 @@ from argparse import ArgumentParser
 MONGODB_SNOBJID_COLLECTION = 'object_links'
 ML_VERSION = 2
 
-def random_snobs(oracle_dbi, num):
+def random_snobs(oracle_dbi, mongodb_collection, num):
 
     """Select `num` random detections of variability from DES SN Y2,
     returning a list of dictionaries that can be converted into JSON
@@ -101,6 +101,13 @@ def random_snobs(oracle_dbi, num):
 
             rdict = dict(zip(colnames, query_result))
 
+            # But be careful not to accept any rows that are already present in
+            # the MongoDB.
+
+            if mongodb_collection.find({'snobjid':rdict['snobjid']}).count() > 0:
+                logging.debug('%d is already present in Mongo; continuing.' % snobjid)
+                continue
+
             if rdict['ccdnum'] < 10:
                 rdict['ccdnum'] = '0%d' % rdict['ccdnum']
             if rdict['attnum'] < 10:
@@ -155,17 +162,8 @@ if __name__ == '__main__':
                       (MONGODB_SNOBJID_COLLECTION,
                        mongodb_collection.count()))
 
-    dicts = random_snobs(oracle_dbi, args.numget)
-
-    inserted = 0
-    for d in dicts:
-
-        # If the record is not already in Mongo, create it and add
-        # it.
-    
-        if mongodb_collection.find({'snobjid':d['snobjid']}).count() == 0:
-            mongodb_collection.insert(d)
-            inserted += 1
-            
-    logging.info('Successfully transferred %d records from NCSA to NERSC.' % inserted)
+    # Business logic is the following three lines. 
+    dicts = random_snobs(oracle_dbi, mongodb_collection, args.numget)
+    mongodb_collection.insert(dicts)
+    logging.info('Successfully transferred %d records from NCSA to NERSC.' % len(dicts))
     
