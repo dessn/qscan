@@ -69,7 +69,7 @@ def fetch(n_fetch=10):
                                 config.MONGODB_SCAN_COLLECTION_NAME)
     
     # Get objects to scan.
-    new_objects = scan_collection.find({'scanned':False})
+    new_objects = scan_collection.find({'scanned':False}).limit(n_fetch)
 
     # Once objects are loaded, initialize their "scanned" field to 0.
     # This means they were looked at, but not saved.
