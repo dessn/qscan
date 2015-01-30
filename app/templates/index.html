@@ -15,29 +15,9 @@
 	</div>
       </div>
     </div>
-
     <div id="scroll-container" class="row">
       <div class="content">
-	{% if links|count == 0 %}
-	<div class="alert alert-success">
-	  <h4>Well done!</h4>
-	  You finished scanning everything on the stack.
-	</div>
-	{% else %}
-	{% for link in links %}
-	<div class="span6">
-	  <div class="item">
-	    {% for imtype in ['srch', 'temp', 'diff'] %}
-	    <div class="span2">
-	      <div class="img">
-		<img src={{ ngettext( link, imtype ) }}>
-	      </div>
-	    </div>
-	    {% endfor %}
-	  </div>
-	</div>
-	{% endfor %}
-	{% endif %}
+        {% include content.html %}
       </div>
     </div>
 </body>
