@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+__all__     = ['random_snobs']
 __author__  = 'Danny Goldstein <dgold@berkeley.edu>'
 __whatami__ = 'Opening database connections and fetching data from '\
               'DESOPER is slow. Because we know exactly what  data '\
@@ -15,7 +16,6 @@ import logging
 import cx_Oracle
 from argparse import ArgumentParser
 
-MONGODB_SNOBJID_COLLECTION = 'object_links'
 ML_VERSION = 2
 
 def random_snobs(oracle_dbi, mongodb_collection, num):
@@ -146,7 +146,7 @@ if __name__ == '__main__':
     oracle_dbi = cx_Oracle.connect(config.ORACLE_URI).cursor()
     mongo_dbi = getattr(pymongo.MongoClient(config.MONGODB_RW_URI),
                         config.MONGODB_DBNAME)
-    mongodb_collection = getattr(mongo_dbi, MONGODB_SNOBJID_COLLECTION)
+    mongodb_collection = getattr(mongo_dbi, config.MONGODB_OBJECT_COLLECTION_NAME)
 
     
     # Delete everything in the MongoDB if `em` is flagged at the
@@ -154,12 +154,12 @@ if __name__ == '__main__':
 
     if args.em:
         logging.debug('%s MongoDB collection has %d documents.' % \
-                      (MONGODB_SNOBJID_COLLECTION,
+                      (config.MONGODB_OBJECT_COLLECTION_NAME,
                        mongodb_collection.count()))
         logging.debug('Removing all documents from collection...')
         mongodb_collection.remove()
         logging.debug('%s now contains %d documents.' %
-                      (MONGODB_SNOBJID_COLLECTION,
+                      (config.MONGODB_OBJECT_COLLECTION_NAME,
                        mongodb_collection.count()))
 
     # Business logic is the following three lines. 
