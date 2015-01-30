@@ -106,7 +106,7 @@ def register_scan():
         return jsonify(flip=False)
 
     # Flip the scan decision. 
-    obj['scanned'] = not obj['scanned']
+    obj['scanned'] = int(not obj['scanned'])
 
     # Update the database. 
     scan_collection.update(obj)
