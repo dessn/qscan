@@ -18,7 +18,7 @@ from argparse import ArgumentParser
 
 ML_VERSION = 2
 
-def random_snobs(oracle_dbi, mongodb_collection, num):
+def random_snobs(oracle_dbi, mongodb_object_collection, num):
 
     """Select `num` random detections of variability from DES SN Y2,
     returning a list of dictionaries that can be converted into JSON
@@ -104,7 +104,7 @@ def random_snobs(oracle_dbi, mongodb_collection, num):
             # But be careful not to accept any rows that are already present in
             # the MongoDB.
 
-            if mongodb_collection.find({'snobjid':rdict['snobjid']}).count() > 0:
+            if mongodb_object_collection.find({'snobjid':rdict['snobjid']}).count() > 0:
                 logging.debug('%d is already present in Mongo; continuing.' % snobjid)
                 continue
 
@@ -146,8 +146,8 @@ if __name__ == '__main__':
     oracle_dbi = cx_Oracle.connect(config.ORACLE_URI).cursor()
     mongo_dbi = getattr(pymongo.MongoClient(config.MONGODB_RW_URI),
                         config.MONGODB_DBNAME)
-    mongodb_collection = getattr(mongo_dbi, config.MONGODB_OBJECT_COLLECTION_NAME)
-
+    mongodb_object_collection = getattr(mongo_dbi, config.MONGODB_OBJECT_COLLECTION_NAME)
+    mongodb_scan_collection   = getattr(mongo_dbi, config.MONGODB_SCAN_COLLECTION_NAME)
     
     # Delete everything in the MongoDB if `em` is flagged at the
     # command line.
@@ -155,15 +155,16 @@ if __name__ == '__main__':
     if args.em:
         logging.debug('%s MongoDB collection has %d documents.' % \
                       (config.MONGODB_OBJECT_COLLECTION_NAME,
-                       mongodb_collection.count()))
+                       mongodb_object_collection.count()))
         logging.debug('Removing all documents from collection...')
-        mongodb_collection.remove()
+        mongodb_object_collection.remove()
         logging.debug('%s now contains %d documents.' %
                       (config.MONGODB_OBJECT_COLLECTION_NAME,
-                       mongodb_collection.count()))
+                       mongodb_object_collection.count()))
 
-    # Business logic is the following three lines. 
-    dicts = random_snobs(oracle_dbi, mongodb_collection, args.numget)
-    mongodb_collection.insert(dicts)
+    # Business logic is the following four lines. 
+    dicts = random_snobs(oracle_dbi, mongodb_object_collection, args.numget)
+    mongodb_object_collection.insert(dicts)
+    mongodb_scan_collection.insert([{'snobjid':d['snobjid'], 'scanned':False} for d in dicts])
     logging.info('Successfully transferred %d records from NCSA to NERSC.' % len(dicts))
     
