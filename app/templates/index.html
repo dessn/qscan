@@ -1,2 +1,48 @@
 {% extends "bootstrap/base.html" %}
-{% block title %}Infinite Scan{% endblock %}
+{% block title %}qscan{% endblock %}
+{% block styles %}
+<link rel="stylesheet" href="./css/style.css"/>
+{% endblock %}
+{% block content %}
+<body id="start">
+  <div id="loader"></div>
+  
+  <div class="container">
+    <div class="row">
+      <div class="span12">
+	<div class="hero-unit">
+	  <h1>qscan</h1>
+	</div>
+      </div>
+    </div>
+
+    <div id="scroll-container" class="row">
+      <div class="content">
+	{% if links|count == 0 %}
+	<div class="alert alert-success">
+	  <h4>Well done!</h4>
+	  You finished scanning everything on the stack.
+	</div>
+	{% else %}
+	{% for link in links %}
+	<div class="span6">
+	  <div class="item">
+	    {% for imtype in ['srch', 'temp', 'diff'] %}
+	    <div class="span2">
+	      <div class="img">
+		<img src={{ ngettext( link, imtype ) }}>
+	      </div>
+	    </div>
+	    {% endfor %}
+	  </div>
+	</div>
+	{% endfor %}
+	{% endif %}
+      </div>
+    </div>
+</body>
+{% endblock %}
+
+{% block scripts %}
+  <script src="{{ url_for( 'static', script.js ) }}"/>
+{% endblock %}
