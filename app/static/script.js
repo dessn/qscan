@@ -11,8 +11,7 @@ by danny goldstein 2014
 
 jQuery(document).ready(function() {
   
-  //on scroll gets when bottom of the page is reached and calls the
-  //function do load more content
+  // When you hit bottom, load more crap to scan.
   
   $(window).data('ajaxready', true).scroll(function(e){
     if ($(window).data('ajaxready') == false) return;
