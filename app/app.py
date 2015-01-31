@@ -35,7 +35,7 @@ def create_mongoclient():
 
 # And tear it down afterwards.
 
-@app.teardown_reqeuest
+@app.teardown_request
 def destroy_mongoclient():
     db = getattr(g, db, None)
     if db is not None:
