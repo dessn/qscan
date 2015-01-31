@@ -9,6 +9,8 @@ qscan jQuery
 by danny goldstein 2014
 ******************************************/
 
+console.log('here we are');
+
 jQuery(document).ready(function() {
 
     // When you hit bottom, load more crap to scan.
@@ -45,7 +47,7 @@ jQuery(document).ready(function() {
     $(".panel").click(function() {
 	$.post($SCRIPT_ROOT + '/register_scan',
 	       {snobjid: int($(this).find('.panel-title')
-			     .first().text())}
+			     .first().text())},
 	       function(data){
 		   var response = jQuery.parseJSON(data);
 		   if (response.flip){
