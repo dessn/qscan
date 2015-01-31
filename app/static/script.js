@@ -15,18 +15,29 @@ jQuery(document).ready(function() {
   
   $(window).data('ajaxready', true).scroll(function(e){
     if ($(window).data('ajaxready') == false) return;
-  
+
     if ($(window).scrollTop() + $(window).height() >= 
         $(document).height() - 300) {
       console.log("bottom of the page reached!");
-      $('#loader').fadeIn('slow', function() {
-        $(window).data('ajaxready', false);
-	$.get($SCRIPT_ROOT + '/fetch_more', function(data){
-	  $('#loader').fadeOut('slow', function(){
-	    $('#append-target').append(data).fadeIn(999);
+
+      // See if there is anything left to fetch.
+
+      var anything_left = $.getJSON($SCRIPT_ROOT + '/anything_left',
+                                    function(data){
+                                      return data.answer
+                                    });
+      
+      if (anything_left){
+
+        $('#loader').fadeIn('slow', function() {
+          $(window).data('ajaxready', false);
+	  $.get($SCRIPT_ROOT + '/fetch_more', function(data){
+	    $('#loader').fadeOut('slow', function(){
+	      $('#append-target').append(data).fadeIn(999);
+	    });
 	  });
-	});
-      });
+        });
+      }
     }
   });   
   
@@ -37,7 +48,8 @@ jQuery(document).ready(function() {
 	   {snobjid: int($(this).find('.panel-title')
 			 .first().text())}
 	   function(data){
-	     if (data.flip){
+             var response = jQuery.parseJSON(data);
+	     if (response.flip){
 	       $(this).toggleClass("focus");
 	     }		       
 	   });

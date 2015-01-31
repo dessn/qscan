@@ -5,7 +5,6 @@ __author__    = 'Danny Goldstein <dgold@berkeley.edu>'
 __whatami__   = 'Flask server backend for qscan, a mobile-first web application'\
                 'that allows one to quickly scan detections of DES SN candidates.'
 __version__   = '0.0.1'
-__copyright__ = 'Copyright 2014, Danny Goldstein'
 
 # Database interaction occurs exclusively with a MongoDB at NERSC.  DB
 # connection info is stored in the `qscan.config` module, and form
@@ -120,8 +119,14 @@ def register_scan():
 
 @app.route("/fetch_more")
 def ajax_fetch():
-    links = fetch()
-    
+    links = fetch()    
     return render_template("content.html", links=links)
     
-
+@app.route("/anything_left")
+def anything_left():
+    """See if there is anything left to scan."""    
+    scan_collection = getattr(g.db,
+                              config.MONGODB_SCAN_COLLECTION_NAME)
+    
+    answer = (scan_collection.find({'scanned':False}).count() > 0)
+    return jsonify(answer=answer)
