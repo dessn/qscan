@@ -130,3 +130,7 @@ def anything_left():
     
     answer = (scan_collection.find({'scanned':False}).count() > 0)
     return jsonify(answer=answer)
+
+if __name__ == "__main__":
+    app.run(host="0.0.0.0", port=25000)
+
