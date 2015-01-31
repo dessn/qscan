@@ -8,7 +8,6 @@ __whatami__ = 'Opening database connections and fetching data from '\
               'we need to read, we can transfer what we need to    '\
               "NERSC Mongo so that we don't have to deal with slow "\
               'speeds.'
-__copyright__ = 'Copyright 2014, Danny Goldstein'
 
 import config
 import pymongo
@@ -134,9 +133,11 @@ if __name__ == '__main__':
                         type=int, default=10000)
     parser.add_argument('--debug', '-d', help='Log debug messages to the console.',
                         action='store_true', dest='debug')
-    parser.add_argument('--empty-mongo', help='Remove all documents from the MongoDB target'\
+    parser.add_argument('--empty-mongo-objects', '--emo', help='Remove all documents from the MongoDB object'\
                                               'collection at the beginning of execution.',
-                        action='store_true', dest='em')
+                        action='store_true', dest='emo')
+    parser.add_argument('--empty-mongo-scan', '--ems', help='Remove all documents from the MongoDB scan collection '\
+                        'at the beginning of execution.', action='store_true', dest='ems')
     args = parser.parse_args()
 
     # Configure logging. 
@@ -149,10 +150,10 @@ if __name__ == '__main__':
     mongodb_object_collection = getattr(mongo_dbi, config.MONGODB_OBJECT_COLLECTION_NAME)
     mongodb_scan_collection   = getattr(mongo_dbi, config.MONGODB_SCAN_COLLECTION_NAME)
     
-    # Delete everything in the MongoDB if `em` is flagged at the
-    # command line.
+    # Delete everything in the MongoDB object table if `emo` is
+    # flagged at the command line.
 
-    if args.em:
+    if args.emo:
         logging.debug('%s MongoDB collection has %d documents.' % \
                       (config.MONGODB_OBJECT_COLLECTION_NAME,
                        mongodb_object_collection.count()))
@@ -162,9 +163,23 @@ if __name__ == '__main__':
                       (config.MONGODB_OBJECT_COLLECTION_NAME,
                        mongodb_object_collection.count()))
 
+    # Delete everything in the MongoDB scan table if `ems` is flagged
+    # at the command line.
+
+    if args.ems:
+        logging.debug('%s MongoDB collection has %d documents.' % \
+                      (config.MONGODB_SCAN_COLLECTION_NAME,
+                       mongodb_scan_collection.count()))
+        logging.debug('Removing all documents from collection...')
+        mongodb_object_collection.remove()
+        logging.debug('%s now contains %d documents.' %
+                      (config.MONGODB_SCAN_COLLECTION_NAME,
+                       mongodb_scan_collection.count()))
+        
+
     # Business logic is the following four lines. 
     dicts = random_snobs(oracle_dbi, mongodb_object_collection, args.numget)
     mongodb_object_collection.insert(dicts)
-    mongodb_scan_collection.insert([{'snobjid':d['snobjid'], 'scanned':False} for d in dicts])
+    mongodb_scan_collection.insert([{'snobjid':d['snobjid'], 'label':None} for d in dicts])
     logging.info('Successfully transferred %d records from NCSA to NERSC.' % len(dicts))
     

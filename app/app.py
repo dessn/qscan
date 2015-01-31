@@ -7,9 +7,8 @@ __whatami__   = 'Flask server backend for qscan, a mobile-first web application'
 __version__   = '0.0.1'
 
 # Database interaction occurs exclusively with a MongoDB at NERSC.  DB
-# connection info is stored in the `qscan.config` module, and form
-# classes are stored in the `qscan.forms` module. Flask-bootstrap
-# keeps the website looking sharp.
+# connection info is stored in qscan.config. Flask-bootstrap keeps the
+# website looking sharp.
 
 import logging
 import pymongo 
@@ -48,11 +47,12 @@ def destroy_mongoclient(exception):
 @app.before_first_request
 def configure_logging() :
     """Replace Flask's default logging handler(s)."""
-    del app.logger.handlers[ : ]
+    del app.logger.handlers[:]
     handler = logging.StreamHandler()
-    handler.setFormatter( logging.Formatter( "%(asctime)-15s %(levelname)-8s %(message)s" ) )
-    app.logger.addHandler( handler )
-    app.logger.setLevel( logging.DEBUG )
+    handler.setFormatter(logging.Formatter(
+        "%(asctime)-15s %(levelname)-8s %(message)s"))
+    app.logger.addHandler(handler)
+    app.logger.setLevel(logging.DEBUG)
 
 def fetch(n_fetch=10):
     
@@ -72,16 +72,19 @@ def fetch(n_fetch=10):
                                 config.MONGODB_SCAN_COLLECTION_NAME)
     
     # Get objects to scan.
-    new_objects = scan_collection.find({'scanned':False}).limit(n_fetch)
+    new_objects = scan_collection.find({'label':None}).limit(n_fetch)
 
-    # Once objects are loaded, initialize their "scanned" field to 0.
-    # This means they were looked at, but not saved.
-    for obj in new_objects:
-        obj['scanned'] = 0
-    scan_collection.update(new_objects)
+    logging.debug(
 
     # Links to the images of the objects are loaded
     snobjids = [ob['snobjid'] for ob in new_objects]
+
+    # Once objects are loaded, initialize their "label" field to 0.
+    # This means they were looked at, but not saved.
+    for obj in new_objects:
+        obj['label'] = 0
+    scan_collection.update({'snobjid':{'$in':snobjids}}, {'$set':
+
     link_set = object_collection.find({'snobjid':{'$in':snobjids}}, 
                                       {'snobjid': 1,'fmtstr':1})
     links = list(link_set)
@@ -96,7 +99,7 @@ def index():
 def register_scan():
     
     """This method gets called when somebody touches a frame as they
-    scan. It flips the boolean value of the ``scanned'' field of the
+    scan. It flips the boolean value of the ``label'' field of the
     object in the mongoDB scan document collection, then returns a
     json response that is True if the flip was successful, false
     otherwise."""
@@ -113,7 +116,7 @@ def register_scan():
         return jsonify(flip=False)
 
     # Flip the scan decision. 
-    obj['scanned'] = int(not obj['scanned'])
+    obj['label'] = int(not obj['label'])
 
     # Update the database. 
     scan_collection.update(obj)
@@ -132,7 +135,7 @@ def anything_left():
     scan_collection = getattr(g.db,
                               config.MONGODB_SCAN_COLLECTION_NAME)
     
-    answer = (scan_collection.find({'scanned':False}).count() > 0)
+    answer = (scan_collection.find({'label':None}).count() > 0)
     return jsonify(answer=answer)
 
 if __name__ == "__main__":
