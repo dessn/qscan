@@ -37,8 +37,8 @@ def create_mongoclient():
 
 @app.teardown_request
 def destroy_mongoclient(exception):
-    db = getattr(g, db, None)
-    dbcon = getattr(g, dbcon, None)
+    db = getattr(g, 'db', None)
+    dbcon = getattr(g, 'dbcon', None)
     if db is not None:
         del db
     if dbcon is not None:
