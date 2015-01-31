@@ -107,7 +107,7 @@ def register_scan():
 
     # If one does not exist, return a negative response.
     if obj is None:
-        return False
+        return jsonify(flip=False)
 
     # Flip the scan decision. 
     obj['scanned'] = int(not obj['scanned'])
@@ -116,10 +116,12 @@ def register_scan():
     scan_collection.update(obj)
 
     # Return success.
-    return True
+    return jsonify(flip=True)
 
 @app.route("/fetch_more")
 def ajax_fetch():
     links = fetch()
+    
     return render_template("content.html", links=links)
     
+

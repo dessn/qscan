@@ -37,7 +37,7 @@ jQuery(document).ready(function() {
 	   {snobjid: int($(this).find('.panel-title')
 			 .first().text())}
 	   function(data){
-	     if (data.result){
+	     if (data.flip){
 	       $(this).toggleClass("focus");
 	     }		       
 	   });
