@@ -74,16 +74,13 @@ def fetch(n_fetch=10):
     # Get objects to scan.
     new_objects = scan_collection.find({'label':None}).limit(n_fetch)
 
-    logging.debug(
-
     # Links to the images of the objects are loaded
     snobjids = [ob['snobjid'] for ob in new_objects]
 
     # Once objects are loaded, initialize their "label" field to 0.
     # This means they were looked at, but not saved.
-    for obj in new_objects:
-        obj['label'] = 0
-    scan_collection.update({'snobjid':{'$in':snobjids}}, {'$set':
+    scan_collection.update({'snobjid':{'$in':snobjids}},
+                           {'$set':{'label':0}})
 
     link_set = object_collection.find({'snobjid':{'$in':snobjids}}, 
                                       {'snobjid': 1,'fmtstr':1})
@@ -119,7 +116,8 @@ def register_scan():
     obj['label'] = int(not obj['label'])
 
     # Update the database. 
-    scan_collection.update(obj)
+    scan_collection.update({'snobjid':obj['snobjid']},
+                           {'$set':{'label':int(not obj['label'])}})
 
     # Return success.
     return jsonify(flip=True)
