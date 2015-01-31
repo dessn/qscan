@@ -50,7 +50,7 @@ def configure_logging() :
     del app.logger.handlers[:]
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter(
-        "%(asctime)-15s %(levelname)-8s %(message)s"))
+        "[%(asctime)s %(levelname)s]: %(message)s"))
     app.logger.addHandler(handler)
     app.logger.setLevel(logging.DEBUG)
 
