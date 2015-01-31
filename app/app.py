@@ -31,15 +31,19 @@ bootstrap = Bootstrap(app)
 
 @app.before_request
 def create_mongoclient():
-    g.db = pymongo.MongoClient(config.MONGODB_RW_URI)
+    g.dbcon = pymongo.MongoClient(config.MONGODB_RW_URI)
+    g.db = getattr(g.dbcon, config.MONGODB_DBNAME)
 
 # And tear it down afterwards.
 
 @app.teardown_request
-def destroy_mongoclient():
+def destroy_mongoclient(exception):
     db = getattr(g, db, None)
+    dbcon = getattr(g, dbcon, None)
     if db is not None:
-        db.close()
+        del db
+    if dbcon is not None:
+        dbcon.disconnect()
 
 @app.before_first_request
 def configure_logging() :
@@ -132,5 +136,4 @@ def anything_left():
     return jsonify(answer=answer)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=25000)
-
+    app.run(host="0.0.0.0", port=25981)
