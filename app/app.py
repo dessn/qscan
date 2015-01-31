@@ -13,7 +13,7 @@ __version__   = '0.0.1'
 
 import logging
 import pymongo 
-from qscan import config, forms 
+from qscan import config 
 from flask.ext.bootstrap import Bootstrap
 from flask import Flask, g, render_template, request, jsonify
 
