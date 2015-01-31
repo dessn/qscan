@@ -83,7 +83,8 @@ def fetch(n_fetch=10):
     # Once objects are loaded, initialize their "label" field to 0.
     # This means they were looked at, but not saved.
     scan_collection.update({'snobjid':{'$in':snobjids}},
-                           {'$set':{'label':0}})
+                           {'$set':{'label':0}},
+                           multi=True)
 
     link_set = object_collection.find({'snobjid':{'$in':snobjids}}, 
                                       {'snobjid': 1,'fmtstr':1})
