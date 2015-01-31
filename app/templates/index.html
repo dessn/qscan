@@ -27,5 +27,5 @@
   <script type="text/javascript">
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
-  <script src="{{ url_for( 'static', script.js ) }}"/>
+  <script src="{{ url_for( 'static', filename='script.js' ) }}"/>
 {% endblock %}
