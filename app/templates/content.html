@@ -8,14 +8,14 @@
 <div class="span6">
   <div class="panel panel-default"> 
     <div class="panel-heading">
-      <h3 class="panel-title">{{ snobjid }}</h3>
+      <h3 class="panel-title">{{ link['snobjid'] }}</h3>
     </div>
     <div class="panel body">
       {% for imtype in ['srch', 'temp', 'diff'] %}
       <div>
         <p class="thumb-title">{{ imtype }}</p>
         <div class="thumbnail">
-          <img src="{{ ngettext( link, imtype ) }}">
+          <img src="{{ ngettext( link['fmtstr'], imtype ) }}">
         </div>
       </div>
       {% endfor %}

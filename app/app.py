@@ -79,8 +79,9 @@ def fetch(n_fetch=10):
 
     # Links to the images of the objects are loaded
     snobjids = [ob['snobjid'] for ob in new_objects]
-    link_set = object_collection.find({'snobjid':{'$in':snobjids}}, {'fmtstr':1})
-    links = [d['fmtstr'] for d in link_set]
+    link_set = object_collection.find({'snobjid':{'$in':snobjids}}, 
+                                      {'snobjid': 1,'fmtstr':1})
+    links = list(link_set)
     return links
 
 @app.route("/")
@@ -106,7 +107,7 @@ def register_scan():
 
     # If one does not exist, return a negative response.
     if obj is None:
-        return jsonify(flip=False)
+        return False
 
     # Flip the scan decision. 
     obj['scanned'] = int(not obj['scanned'])
@@ -115,10 +116,10 @@ def register_scan():
     scan_collection.update(obj)
 
     # Return success.
-    return jsonify(flip=True)
+    return True
 
 @app.route("/fetch_more")
 def ajax_fetch():
     links = fetch()
-    return jsonify(links=links)
+    return render_template("content.html", links=links)
     
