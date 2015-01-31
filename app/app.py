@@ -70,9 +70,12 @@ def fetch(n_fetch=10):
                                 config.MONGODB_OBJECT_COLLECTION_NAME)
     scan_collection   = getattr(g.db,
                                 config.MONGODB_SCAN_COLLECTION_NAME)
-    
+
     # Get objects to scan.
+
+    app.logger.debug('Fetching %d unscanned objects.' % n_fetch)
     new_objects = scan_collection.find({'label':None}).limit(n_fetch)
+    app.logger.debug('Fetched %s.' % new_objects)
 
     # Links to the images of the objects are loaded
     snobjids = [ob['snobjid'] for ob in new_objects]
