@@ -19,7 +19,7 @@ from flask import Flask, g, render_template, request, jsonify
 
 # Application Creation + Configuration
 
-app = Flask(__name__, static_url_path = 'static/')
+app = Flask(__name__, static_url_path = '/static')
 app.debug = True
 
 # Give templates easy access to Twitter bootstrap with
