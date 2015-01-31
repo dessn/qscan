@@ -104,7 +104,11 @@ def register_scan():
     json response that is True if the flip was successful, false
     otherwise."""
 
+    app.logger.debug('register_scan triggered!')
+    
     snobjid = request.args.get('snobjid', 0, type=int)
+    app.logger.debug('HTTP request payload contained SNOBJID %d.' % snobjid)
+    
     scan_collection = getattr(g.db,
                               config.MONGODB_SCAN_COLLECTION_NAME)
 
@@ -113,31 +117,54 @@ def register_scan():
 
     # If one does not exist, return a negative response.
     if obj is None:
-        return jsonify(flip=False)
+        negative_json_response = jsonify(flip=False)
+        app.logger.debug('Object not found in %s. Returning negative '\
+                         'JSON response: %s.' % \
+                         config.MONGODB_SCAN_COLLECTION_NAME,
+                         negative_json_response)
+        return negative_json_response
 
-    # Flip the scan decision. 
-    obj['label'] = int(not obj['label'])
+    app.logger.debug('Object %d was found in %s.' % \
+                     (snobjid, config.MONGODB_SCAN_COLLECTION_NAME))
+
+    app.logger.debug('Updating %s with new scan decision.'\
+                     '%d is now %d.' % (config.MONGODB_SCAN_COLLECTION_NAME,
+                                        snobjid, int(not obj['label'])))
 
     # Update the database. 
     scan_collection.update({'snobjid':obj['snobjid']},
                            {'$set':{'label':int(not obj['label'])}})
+    app.logger.debug('Database updated: %d rows affected.' % \
+                     g.db.command('getLastError')['n'])
 
     # Return success.
-    return jsonify(flip=True)
+    json_success = jsonify(flip=True)
+    app.logger.debug('JSON success response: %s.' % json_success)
+    return json_success
 
 @app.route("/fetch_more")
 def ajax_fetch():
-    links = fetch()    
-    return render_template("content.html", links=links)
+    """Fetch more objects to scan and return the result as HTML."""
+
+    app.logger.debug('Entering ajax_fetch!')
+    links = fetch()
+    response = render_template("content.html", links=links)
+    app.logger.debug('ajax_fetch returning: %s' % response)
+    return response
     
 @app.route("/anything_left")
 def anything_left():
-    """See if there is anything left to scan."""    
+    """See if there is anything left to scan."""
+
+    app.logger.debug('Anything left called!')
     scan_collection = getattr(g.db,
                               config.MONGODB_SCAN_COLLECTION_NAME)
     
     answer = (scan_collection.find({'label':None}).count() > 0)
-    return jsonify(answer=answer)
+    response = jsonify(answer=answer)
+    
+    app.logger.debug('Returning response: %s.' % response)
+    return response
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=25981)
