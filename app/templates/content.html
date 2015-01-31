@@ -1,5 +1,5 @@
 {% if links|count == 0 %}
-<div class="alert alert-success">
+<div class="alert alert-success span10">
   <h4>Well done!</h4>
   You've finished scanning everything on the stack.
 </div>
@@ -12,12 +12,10 @@
     </div>
     <div class="panel body">
       {% for imtype in ['srch', 'temp', 'diff'] %}
-      <div>
         <p class="thumb-title">{{ imtype }}</p>
         <div class="thumbnail">
-          <img src="{{ ngettext( link['fmtstr'], imtype ) }}">
+          <img src="{{ link['fmtstr'] % imtype }}" style="width:130px;height:130px;">
         </div>
-      </div>
       {% endfor %}
     </div>
   </div>
