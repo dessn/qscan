@@ -75,10 +75,10 @@ def fetch(n_fetch=10):
 
     app.logger.debug('Fetching %d unscanned objects.' % n_fetch)
     new_objects = scan_collection.find({'label':None}).limit(n_fetch)
-    app.logger.debug('Fetched %s.' % list(new_objects))
-
+    
     # Links to the images of the objects are loaded
     snobjids = [ob['snobjid'] for ob in new_objects]
+    app.logger.info('Fetched snobjids: %s.' % snobjids)
 
     # Once objects are loaded, initialize their "label" field to 0.
     # This means they were looked at, but not saved.

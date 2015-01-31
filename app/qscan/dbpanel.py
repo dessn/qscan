@@ -30,11 +30,12 @@ def summarize_scan(sc):
                  % sc.find({'label':1}).count())
 
 def reset_scan(sc):
-    logging.info("Resetting 'label' fields of all %s documents to `unviewed`..." \
+    logging.info("Resetting 'label' fields of all relevant %s documents "\
+                 "to `unviewed`..." \
                  % config.MONGODB_SCAN_COLLECTION_NAME)
-    sc.update({}, {'$set':{'label':None}})
+    sc.update({'label':{'$ne':None}}, {'$set':{'label':None}}, multi=True)
     logging.info('%d rows affected.' % \
-                 db.run_command({'getLastError':1})['n'])
+                 db.command('getLastError')['n'])
 
 if __name__ == '__main__':
 
