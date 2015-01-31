@@ -171,7 +171,7 @@ if __name__ == '__main__':
                       (config.MONGODB_SCAN_COLLECTION_NAME,
                        mongodb_scan_collection.count()))
         logging.debug('Removing all documents from collection...')
-        mongodb_object_collection.remove()
+        mongodb_scan_collection.remove()
         logging.debug('%s now contains %d documents.' %
                       (config.MONGODB_SCAN_COLLECTION_NAME,
                        mongodb_scan_collection.count()))
