@@ -75,7 +75,7 @@ def fetch(n_fetch=10):
 
     app.logger.debug('Fetching %d unscanned objects.' % n_fetch)
     new_objects = scan_collection.find({'label':None}).limit(n_fetch)
-    app.logger.debug('Fetched %s.' % new_objects)
+    app.logger.debug('Fetched %s.' % list(new_objects))
 
     # Links to the images of the objects are loaded
     snobjids = [ob['snobjid'] for ob in new_objects]
