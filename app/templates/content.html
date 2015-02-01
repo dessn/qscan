@@ -1,20 +1,28 @@
 {% if links|count == 0 %}
-<div class="alert alert-success span10">
-  <h4>Well done!</h4>
-  You've finished scanning everything on the stack.
+<div class="col-lg-12">
+  <div class="panel panel-success">
+    <div class="panel-heading">
+      <h4>Well done!</h4>
+    </div>
+    <div class="panel-body">
+      You finished scanning everything on the stack.
+    </div>
+  </div>
 </div>
 {% else %}
 {% for link in links %}
-<div class="span6">
-  <div class="panel panel-default"> 
+<div class="col-md-4">
+  <div class="panel panel-default">
     <div class="panel-heading">
       <h3 class="panel-title">{{ link['snobjid'] }}</h3>
     </div>
     <div class="panel-body">
       {% for imtype in ['srch', 'temp', 'diff'] %}
-        <p class="thumb-title">{{ imtype }}</p>
-        <div class="thumbnail">
-          <img src="{{ link['fmtstr'] % imtype }}" style="width:130px;height:130px;">
+        <div class="col-md-4 col-xs-4 thumbnail">
+          <img src="{{ link['fmtstr'] % imtype }}" style="width:100%;">
+	  <div class="caption" style="text-align:center;">
+	    {{ imtype }}
+	  </div>
         </div>
       {% endfor %}
     </div>
