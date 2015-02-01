@@ -50,7 +50,7 @@ jQuery(document).ready(function() {
     // When someone clicks a panel, turn it on / off in the browser
     // and on the backend.
     
-    $('#append-target').on("click", ".panel-default", function(e){
+    $('#scroll-container').on("click", ".panel-default", function(e){
 	    var snobjid = $(this).find('.panel-title').first().text();	
 	    var $this = $(this);
 	    console.log(snobjid);
@@ -70,7 +70,7 @@ jQuery(document).ready(function() {
 		  function(json){
 		      fetchobjects  = json.has_data;
 		      var html      = json.html;
-		      $('#append-target').append(html).fadeIn(999);
+		      $('#scroll-container').append(html).fadeIn(999);
 		  });
     }
     
