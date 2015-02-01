@@ -54,7 +54,7 @@ def configure_logging() :
     app.logger.addHandler(handler)
     app.logger.setLevel(logging.DEBUG)
 
-def fetch(n_fetch=10):
+def fetch(n_fetch=12):
     
     """Return the format string of N_FETCH unviewed objects.  On the
     backend, initialize them by setting their status to viewed, but
