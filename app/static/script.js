@@ -1,58 +1,76 @@
-/******************************************
+/************************
 qscan jQuery
 
-* defines infinite scroll behavior for
+* infinite scroll for
   the qscan main page
-* defines AJAX call to log scanning 
+
+* AJAX to log scanning 
   decisions
 
 by danny goldstein 2014
-******************************************/
-
-console.log('here we are');
+*************************/
 
 jQuery(document).ready(function() {
 
-    // When you hit bottom, load more crap to scan.
-  
-    $(window).data('ajaxready', true).scroll(function(e){
-	if ($(window).data('ajaxready') === false) return;
-	
-	if ($(window).scrollTop() + $(window).height() >= 
-            $(document).height() - 300) {
-	    console.log("bottom of the page reached!");
-	    
-	    // See if there is anything left to fetch.
-	    
-	    var anything_left = $.getJSON($SCRIPT_ROOT + '/anything_left',
-					  function(data){
-					      return data.answer
-                                      });
-	    
-	    if (anything_left){	    
-		$('#loader').fadeIn('slow', function() {
-		    $(window).data('ajaxready', false);
-		    $.get($SCRIPT_ROOT + '/fetch_more', function(data){
-			$('#loader').fadeOut('slow', function(){
-			    $('#append-target').append(data).fadeIn(999);
-			});
-		    });
-		});
-	    }
-	}
-    });   
-    
-    // Log scanning decisions. 
-    
-    $(".panel").click(function() {
-	$.post($SCRIPT_ROOT + '/register_scan',
-	       {snobjid: int($(this).find('.panel-title')
-			     .first().text())},
-	       function(data){
-		   var response = jQuery.parseJSON(data);
-		   if (response.flip){
-		       $(this).toggleClass("focus");
-		   }		       
-	       });
+    // Always start from the top.
+
+    $(window).on('beforeunload', function() {
+	    $(window).scrollTop(0);
     });
-});
+   
+    // When there are no objects left on the server, cease all AJAX
+    // calls to fetch new objects by toggling the fetchobjects
+    // variable.
+
+    var fetchobjects = true;
+
+    // Set up the page with an initial fetch.
+    
+    fetchScanObjectsAjax();
+
+    // When you hit the bottom of the page, load more crap to scan.
+    // The 'ajaxready' variable prevents multiple AJAX calls from
+    // being launched from a single bottom-hit.
+
+    $(window).data('ajaxready', true);
+    $(window).scroll(function(e){
+	    if (!$(window).data('ajaxready') || !fetchobjects) return;
+	    if ($(window).scrollTop() + $(window).height() >= $(document).height() - 300){
+		console.log("Reached the bottom of the page!");
+		$(window).data('ajaxready', false);
+		$('#loader').fadeIn('slow', function(){
+			fetchScanObjectsAjax();
+		    });
+		$('#loader').fadeOut('slow', function(){
+			$(window).data('ajaxready', true);
+		    });
+	    }
+	});
+    
+    // When someone clicks a panel, turn it on / off in the browser
+    // and on the backend.
+    
+    $('#append-target').on("click", ".panel-default", function(e){
+	    var snobjid = $(this).find('.panel-title').first().text();	
+	    console.log(snobjid);
+	    $.post($SCRIPT_ROOT + '/register_scan',
+		   {snobjid:snobjid},
+		   function(response){
+		       console.log('response is ' + response.flip);
+		       if (response.flip){
+			   $(this).toggleClass("focus");
+		       }
+		   },
+		   'json');
+	});
+    
+    function fetchScanObjectsAjax(){
+	$.getJSON($SCRIPT_ROOT + '/fetch_more',
+		  function(json){
+		      fetchobjects  = json.has_data;
+		      var html      = json.html;
+		      $('#append-target').append(html).fadeIn(999);
+		  });
+    }
+    
+    });

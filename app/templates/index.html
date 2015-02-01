@@ -1,8 +1,8 @@
 {% extends "bootstrap/base.html" %}
-{% block title %}qscan{% endblock %}
+{% block title %}quickscan{% endblock %}
 {% block styles %}
 {{ super() }}
-<link rel="stylesheet" href="{{ url_for( 'static', filename='css/style.css' ) }}"/>
+<link rel="stylesheet" href="{{ url_for( 'static', filename='css/style.css' ) }}" />
 {% endblock %}
 {% block content %}
 <div id="start">
@@ -12,13 +12,12 @@
     <div class="row">
       <div class="span12">
 	<div class="hero-unit">
-	  <h1>qscan</h1>
+	  <h1>quickscan</h1>
 	</div>
       </div>
     </div>
     <div id="scroll-container" class="row">
-      <div class="content">
-        {% include "content.html" %}
+      <div id="append-target" class="content">
       </div>
     </div>
 {% endblock %}
@@ -28,5 +27,5 @@
   <script type="text/javascript">
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
-  <script src="{{ url_for( 'static', filename='script.js' ) }}"/>
+  <script src="{{ url_for( 'static', filename='script.js' ) }}"></script>
 {% endblock %}
