@@ -52,13 +52,14 @@ jQuery(document).ready(function() {
     
     $('#append-target').on("click", ".panel-default", function(e){
 	    var snobjid = $(this).find('.panel-title').first().text();	
+	    var $this = $(this);
 	    console.log(snobjid);
 	    $.post($SCRIPT_ROOT + '/register_scan',
 		   {snobjid:snobjid},
 		   function(response){
 		       console.log('response is ' + response.flip);
 		       if (response.flip){
-			   $(this).toggleClass("focus");
+		   	   $this.toggleClass("focus");
 		       }
 		   },
 		   'json');
