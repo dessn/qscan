@@ -24,10 +24,12 @@ def summarize_scan(sc):
                     sc.count()))
     logging.info('%d of them are currently unviewed (label=None).'\
                  % sc.find({'label':None}).count())
-    logging.info('%d of them are currently labelled junk (label=0).'\
+    logging.info('%d of them are currently viewed but unsubmitted (label=0).'\
                  % sc.find({'label':0}).count())
-    logging.info('%d of them are currently saved (label=1).'\
-                 % sc.find({'label':1}).count())
+    logging.info('%d of them are currently labelled junk (label=Bogus).'\
+                 % sc.find({'label':'Bogus'}).count())
+    logging.info('%d of them are currently saved (label=Real).'\
+                 % sc.find({'label':'Real'}).count())
 
 def reset_scan(sc):
     logging.info("Resetting 'label' fields of all relevant %s documents "\

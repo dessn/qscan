@@ -105,42 +105,30 @@ def register_scan():
     otherwise."""
 
     app.logger.debug('register_scan triggered!')
-    snobjid = int(request.form.get('snobjid', 0))
+    app.logger.debug('%s' % request.form)
+    junk_snobjids = request.form.getlist('junk_snobjids[]')
+    save_snobjids = request.form.getlist('save_snobjids[]')
     
-    app.logger.debug('HTTP request payload contained SNOBJID %d.' % snobjid)
+    app.logger.debug('HTTP request payload contained SAVE SNOBJIDs %s.' % save_snobjids)
+    app.logger.debug('HTTP request payload contained JUNK SNOBJIDS %s.' % junk_snobjids)
     
     scan_collection = getattr(g.db,
                               config.MONGODB_SCAN_COLLECTION_NAME)
 
-    # Find the object's scan record. 
-    obj = scan_collection.find_one({'snobjid':snobjid})
-
-    # If one does not exist, return a negative response.
-    if obj is None:
-        negative_json_response = jsonify(flip=False)
-        app.logger.debug('Object not found in %s. Returning negative '\
-                         'JSON response: %s.' % \
-                         (config.MONGODB_SCAN_COLLECTION_NAME,
-                         negative_json_response))
-        return negative_json_response
-
-    app.logger.debug('Object %d was found in %s.' % \
-                     (snobjid, config.MONGODB_SCAN_COLLECTION_NAME))
-
-    app.logger.debug('Updating %s with new scan decision.'\
-                     '%d is now %d.' % (config.MONGODB_SCAN_COLLECTION_NAME,
-                                        snobjid, int(not obj['label'])))
-
     # Update the database. 
-    scan_collection.update({'snobjid':obj['snobjid']},
-                           {'$set':{'label':int(not obj['label'])}})
-    app.logger.debug('Database updated: %d rows affected.' % \
+    scan_collection.update({'snobjid':{'$in':save_snobjids}},
+                           {'$set':{'label':'Real'}},
+                           multi=True)
+    app.logger.debug('Real objects updated: %d rows affected.' % \
                      g.db.command('getLastError')['n'])
 
-    # Return success.
-    json_success = jsonify(flip=True)
-    app.logger.debug('JSON success response: %s.' % json_success)
-    return json_success
+    scan_collection.update({'snobjid':{'$in':junk_snobjids}},
+                           {'$set':{'label':'Bogus'}},
+                           multi=True)
+    app.logger.debug('Bogus objects updated: %d rows affected.' % \
+                     g.db.command('getLastError')['n'])
+
+    return jsonify(success=True)
 
 @app.route("/fetch_more")
 def ajax_fetch():
@@ -157,18 +145,9 @@ def ajax_fetch():
     links = fetch()
     html = render_template("content.html", links=links)
     response = jsonify(has_data=has_data,
-                       html=html)
+                       html=html,
+                       numnew=len(links))
     app.logger.debug('ajax_fetch returning: %s' % response.data)
-    return response
-
-@app.route("/anything_left")
-def anything_left():
-    """See if there is anything left to scan."""
-
-    app.logger.debug('Anything left called!')
-    response = jsonify(answer=answer)
-    
-    app.logger.debug('Returning response: %s.' % response)
     return response
 
 if __name__ == "__main__":

@@ -4,10 +4,9 @@
 {{ super() }}
 <link rel="stylesheet" href="{{ url_for( 'static', filename='css/style.css' ) }}" />
 {% endblock %}
+
 {% block content %}
-
 <div id="loader"></div>
-
 <nav class="navbar navbar-default navbar-fixed-top">
   <div class="container">
     <div class="navbar-header">
@@ -22,7 +21,7 @@
     
     <div class="collapse navbar-collapse" id="navbar-collapse-1">
       <ul class="nav navbar-nav pull-right">
-	<li><button type="button" class="btn btn-default navbar-btn">Submit  <span class="badge">0</span></button></li>	
+	<li><button type="button" class="btn btn-default navbar-btn" id="submit-button">Submit  <span class="badge" id="submit-badge">0</span></button></li>	
       </ul>
     </div>
   </div>
@@ -30,7 +29,7 @@
 
 <div class="container">
   <div id="scroll-container" class="row">
-  </div>
+  </div> 
 </div>
     
 {% endblock %}
