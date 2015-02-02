@@ -108,7 +108,9 @@ jQuery(document).ready(function() {
 			       function(){
 				   $(document).find('.object-frame').remove();
 				   $('#submit-badge').text("0");
-				   fetchScanObjectsAjax();
+				   if ($(document).find('.panel-success').length == 0){
+				       fetchScanObjectsAjax();	
+				   }
 				   $('#submit-button').data('ajaxready', true);
 				   $('#loader').fadeOut('slow');
 			       }
