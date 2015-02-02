@@ -120,7 +120,7 @@ jQuery(document).ready(function() {
     function fetchScanObjectsAjax(){
 	$.getJSON($SCRIPT_ROOT + '/fetch_more',
 		  function(json){
-		      fetchobjects  = json.has_data;
+		      fetchobjects  = json.has_data && ($('#toggle-autoloader').text().indexOf('off') > -1)
 		      var html      = json.html;
 		      var numnew    = json.numnew;
 		      
