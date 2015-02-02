@@ -68,6 +68,7 @@ jQuery(document).ready(function() {
 	});
 	
     $('#submit-button').data('ajaxready', true).click(function(e){
+	    if (!$('#submit-button').data('ajaxready')) return;	     
 	    var badge = $(this).children().first();
 	    var numtot = parseInt(badge.text(), 10);
 	    if (numtot == 0) return;
@@ -82,19 +83,25 @@ jQuery(document).ready(function() {
 					       function(element){
 						   return parseInt(jQuery(element).find('h3').first().text());
 					       });
+		
+		$('#loader').fadeIn('slow', function(){
+			$('#submit-button').data('ajaxready', false);
 
-		console.log('save snobjids: ' + save_snobjids);
-		console.log('junk_snobjids: ' + junk_snobjids);
+			console.log('save snobjids: ' + save_snobjids);
+			console.log('junk_snobjids: ' + junk_snobjids);
 
-		$.post($SCRIPT_ROOT + '/register_scan',
-		       {"save_snobjids":save_snobjids,
-			       "junk_snobjids":junk_snobjids},
-		       function(){
-			   $(document).find('.object-frame').remove();
-			   $('#submit-badge').text("0");
-			   fetchScanObjectsAjax();
-		       }
-		       );
+			$.post($SCRIPT_ROOT + '/register_scan',
+			       {"save_snobjids":save_snobjids,
+				       "junk_snobjids":junk_snobjids},
+			       function(){
+				   $(document).find('.object-frame').remove();
+				   $('#submit-badge').text("0");
+				   fetchScanObjectsAjax();
+				   $('#submit-button').data('ajaxready', true);
+				   $('#loader').fadeOut('slow');
+			       }
+			       );
+		    });
 	    }
 	});
 
