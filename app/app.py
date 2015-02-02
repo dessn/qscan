@@ -106,8 +106,8 @@ def register_scan():
 
     app.logger.debug('register_scan triggered!')
     app.logger.debug('%s' % request.form)
-    junk_snobjids = request.form.getlist('junk_snobjids[]')
-    save_snobjids = request.form.getlist('save_snobjids[]')
+    junk_snobjids = map(int, request.form.getlist('junk_snobjids[]'))
+    save_snobjids = map(int, request.form.getlist('save_snobjids[]'))
     
     app.logger.debug('HTTP request payload contained SAVE SNOBJIDs %s.' % save_snobjids)
     app.logger.debug('HTTP request payload contained JUNK SNOBJIDS %s.' % junk_snobjids)
