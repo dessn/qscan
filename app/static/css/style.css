@@ -27,6 +27,17 @@ div.collapsing ul li{
     outline: 0 none;
 }
 
+#loader {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	text-align: left;
+	opacity: .8;
+	background-color: #FFFFFF;
+
 .thumb-title{
     text-align: center;
 }
