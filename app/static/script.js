@@ -46,6 +46,18 @@ jQuery(document).ready(function() {
 		    });
 	    }
 	});
+
+    // Turn off infinite scroll when someone toggles the autoreloader.
+    
+    $('#toggle-autoloader').click(function(e){
+	    fetchobjects = !fetchobjects;
+	    var txt = $(this).text();
+	    if (txt.indexOf("on") > -1){
+		$(this).text(txt.replace('on', 'off'));
+	    } else {
+		$(this).text(txt.replace('off', 'on'));
+	    }
+	});
     
     // When someone clicks a panel, turn it on / off in the browser
     // and on the backend.
