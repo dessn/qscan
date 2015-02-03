@@ -11,22 +11,7 @@
   <div class="container">
    <div id="loader"></div>
     <div class="navbar-header">
-      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse-1">
-	<span class="sr-only">Toggle navigation</span>
-	<span class="icon-bar"></span>
-	<span class="icon-bar"></span>
-	<span class="icon-bar"></span>
-      </button>
       <a class="navbar-brand" href="#">quickscan</a>
-    </div>
-    
-    <div class="collapse navbar-collapse" id="navbar-collapse-1">
-      <ul class="nav navbar-nav pull-right">
-	<li><div class="btn-group" role="group">
-	  <button type="button" class="btn btn-default navbar-btn" id="toggle-autoloader">Turn off Autoloader</button>
-	  <button type="button" class="btn btn-default navbar-btn" id="submit-button">Submit  <span class="badge" id="submit-badge">0</span></button>
-	</div></li>
-      </ul>
     </div>
   </div>
 </nav>
@@ -43,5 +28,6 @@
   <script type="text/javascript">
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
+  <script src="{{ url_for( 'static', filename='imagesloaded.pkgd.min.js' )}}"></script>
   <script src="{{ url_for( 'static', filename='script.js' ) }}"></script>
 {% endblock %}
