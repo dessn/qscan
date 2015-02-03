@@ -80,12 +80,6 @@ def fetch(n_fetch=24):
     snobjids = [ob['snobjid'] for ob in new_objects]
     app.logger.info('Fetched snobjids: %s.' % snobjids)
 
-    # Once objects are loaded, initialize their "label" field to 0.
-    # This means they were looked at, but not saved.
-    scan_collection.update({'snobjid':{'$in':snobjids}},
-                           {'$set':{'label':0}},
-                           multi=True)
-
     link_set = object_collection.find({'snobjid':{'$in':snobjids}}, 
                                       {'snobjid': 1,'fmtstr':1})
     links = list(link_set)
@@ -95,39 +89,30 @@ def fetch(n_fetch=24):
 def index():
     return render_template("index.html")
 
-@app.route("/register_scan", methods=["POST"])
-def register_scan():
+@app.route("/set_object_label", methods=["POST"])
+def set_object_label():
     
-    """This method gets called when somebody touches a frame as they
-    scan. It flips the boolean value of the ``label'' field of the
-    object in the mongoDB scan document collection, then returns a
-    json response that is True if the flip was successful, false
-    otherwise."""
+    """This method sets the label of a scan object in the MongoDB. It
+    gets called when someone looks at an object for the first time and
+    when someone clicks on an object."""
 
-    app.logger.debug('register_scan triggered!')
-    app.logger.debug('%s' % request.form)
-    junk_snobjids = map(int, request.form.getlist('junk_snobjids[]'))
-    save_snobjids = map(int, request.form.getlist('save_snobjids[]'))
-    
-    app.logger.debug('HTTP request payload contained SAVE SNOBJIDs %s.' % save_snobjids)
-    app.logger.debug('HTTP request payload contained JUNK SNOBJIDS %s.' % junk_snobjids)
-    
+    snobjid = int(request.form.get('snobjid'))
+    action_type = request.form.get('action') # look, click
+
+    app.logger.debug('set_object_label triggered for SNOBJID %d!' % snobjid)
     scan_collection = getattr(g.db,
                               config.MONGODB_SCAN_COLLECTION_NAME)
 
-    # Update the database. 
-    scan_collection.update({'snobjid':{'$in':save_snobjids}},
-                           {'$set':{'label':'Real'}},
-                           multi=True)
-    app.logger.debug('Real objects updated: %d rows affected.' % \
-                     g.db.command('getLastError')['n'])
-
-    scan_collection.update({'snobjid':{'$in':junk_snobjids}},
-                           {'$set':{'label':'Bogus'}},
-                           multi=True)
-    app.logger.debug('Bogus objects updated: %d rows affected.' % \
-                     g.db.command('getLastError')['n'])
-
+    if action_type == 'look':
+        scan_collection.update({'snobjid':snobjid}, {'$set':{'label':'Bogus'}})
+        
+    elif action_type == 'click':
+        current_label = scan_collection.findOne({'snobjid':snobjid})['label']
+        scan_collection.update({'snobjid':snobjid}, 
+                               {'$set':{'label':'Real' if 
+                                        current_label == 'Bogus' else 'Bogus'}})
+    app.logger.debug('Updated database with %s, %d rows affected.' % (action_type, 
+                                                                      g.db.command('getLastError')['n']))
     return jsonify(success=True)
 
 @app.route("/fetch_more")
