@@ -107,7 +107,7 @@ def set_object_label():
         scan_collection.update({'snobjid':snobjid}, {'$set':{'label':'Bogus'}})
         
     elif action_type == 'click':
-        current_label = scan_collection.findOne({'snobjid':snobjid})['label']
+        current_label = scan_collection.find_one({'snobjid':snobjid})['label']
         scan_collection.update({'snobjid':snobjid}, 
                                {'$set':{'label':'Real' if 
                                         current_label == 'Bogus' else 'Bogus'}})
