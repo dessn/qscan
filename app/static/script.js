@@ -56,6 +56,7 @@ jQuery(document).ready(function() {
     var snobjid = h3.clone().children().remove().end().text();
     console.log('clicked on ' + snobjid);
     var is_saved = $(this).hasClass('panel-success');
+    $this = $(this);
     
     console.log('starting post request for ' + snobjid);
     $.post($SCRIPT_ROOT + '/set_object_label',
@@ -68,9 +69,9 @@ jQuery(document).ready(function() {
                h3.append('<div class="pull-right">Saved <span class="glyphicon glyphicon-ok-circle" aria-hidden="true"></span></div>').fadeIn(999);
              }
        
-             $(this).toggleClass('panel-default');
-             $(this).toggleClass('panel-success');
-
+             $this.toggleClass('panel-default');
+             $this.toggleClass('panel-success');
+	
            });
   });
 
@@ -102,7 +103,7 @@ jQuery(document).ready(function() {
     $('.object-frame.new').toggleClass('new');
     $.getJSON($SCRIPT_ROOT + '/fetch_more',
 	      function(json){
-		fetchobjects  = json.has_data && ($('#toggle-autoloader').text().indexOf('off') > -1);
+		fetchobjects  = json.has_data;
 		var html      = json.html;
 		var numnew    = json.numnew;
                 
@@ -111,7 +112,8 @@ jQuery(document).ready(function() {
                           function(){
                             $('.object-frame .new')
                               .imagesLoaded(function(){
-				      var handler = onVisibilityChange($(this), function(){
+				      console.log($(this));
+				      var handler = onVisibilityChange($(this)[0], function(){
 					      if (!$(this).data('viewed')){
 						  $(this).data('viewed', true);
 						  var snobjid = $(this).find('h3').first().text();
