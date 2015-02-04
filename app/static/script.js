@@ -53,7 +53,7 @@ jQuery(document).ready(function() {
   $('#scroll-container').on("click", ".object-frame", function(e){
     
     var h3 = $(this).find('h3').first();
-    var snobjid = h3.text();
+    var snobjid = h3.clone().children().remove().end().text();
     console.log('clicked on ' + snobjid);
     var is_saved = $(this).hasClass('panel-success');
     
@@ -97,8 +97,6 @@ jQuery(document).ready(function() {
       console.log('visibility ' + isElementInViewport(el));
     }
   }
-  
-  var handler = onVisibilityChange(el, callback);
     
   function fetchScanObjectsAjax(){
     $('.object-frame.new').toggleClass('new');
