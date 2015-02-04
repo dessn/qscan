@@ -104,7 +104,7 @@ jQuery(document).ready(function() {
     $('.object-frame.new').toggleClass('new');
     $.getJSON($SCRIPT_ROOT + '/fetch_more',
 	      function(json){
-		fetchobjects  = json.has_data && ($('#toggle-autoloader').text().indexOf('off') > -1)
+		fetchobjects  = json.has_data && ($('#toggle-autoloader').text().indexOf('off') > -1);
 		var html      = json.html;
 		var numnew    = json.numnew;
                 
@@ -113,20 +113,21 @@ jQuery(document).ready(function() {
                           function(){
                             $('.object-frame .new')
                               .imagesLoaded(function(){
-                                var handler = onVisibilityChange($(this),
-                                                                 if (!$(this).data('viewed')){
-                                                                   $(this).data('viewed', true);
-                                                                   var snobjid = $(this).find('h3').first().text();
-                                                                   $.post($SCRIPT_ROOT + '/set_object_label',
-                                                                          {snobjid:snobjid,
-                                                                           action_type:'look'},
-                                                                          function(){
-                                                                            console.log('you looked at ' + snobjid);
-                                                                          });
-                                                                 });
-                                $(window).on('DOMContentLoaded load resize scroll', handler); 
-                              });
-                          });
-              });
+				      var handler = onVisibilityChange($(this), function(){
+					      if (!$(this).data('viewed')){
+						  $(this).data('viewed', true);
+						  var snobjid = $(this).find('h3').first().text();
+						  $.post($SCRIPT_ROOT + '/set_object_label',
+				      {snobjid:snobjid,
+					      action_type:'look'},
+							 function(){
+							     console.log('you looked at ' + snobjid);
+							 });
+					      }
+					  });
+				      $(window).on('DOMContentLoaded load resize scroll', handler); 
+				  });
+			  });
+	      });
   }
-});
+    });
