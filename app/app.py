@@ -32,13 +32,19 @@ bootstrap = Bootstrap(app)
 def create_mongoclient():
     g.dbcon = pymongo.MongoClient(config.MONGODB_RW_URI)
     g.db = getattr(g.dbcon, config.MONGODB_DBNAME)
-
+    g.oc = getattr(g.db, config.MONGODB_OBJECT_COLLECTION_NAME)
+    g.sc = getattr(g.db, config.MONGODB_SCAN_COLLECTION_NAME)
+                   
 # And tear it down afterwards.
 
 @app.teardown_request
 def destroy_mongoclient(exception):
     db = getattr(g, 'db', None)
     dbcon = getattr(g, 'dbcon', None)
+    if g.oc is not None:
+        del g.oc
+    if g.sc is not None:
+        del g.sc
     if db is not None:
         del db
     if dbcon is not None:
@@ -66,22 +72,17 @@ def fetch(n_fetch=24):
         Number of objects to fetch.
     """
 
-    object_collection = getattr(g.db, 
-                                config.MONGODB_OBJECT_COLLECTION_NAME)
-    scan_collection   = getattr(g.db,
-                                config.MONGODB_SCAN_COLLECTION_NAME)
-
     # Get objects to scan.
 
     app.logger.debug('Fetching %d unscanned objects.' % n_fetch)
-    new_objects = scan_collection.find({'label':None}).limit(n_fetch)
+    new_objects = g.sc.find({'label':None}).limit(n_fetch)
     
     # Links to the images of the objects are loaded
     snobjids = [ob['snobjid'] for ob in new_objects]
     app.logger.info('Fetched snobjids: %s.' % snobjids)
 
-    link_set = object_collection.find({'snobjid':{'$in':snobjids}}, 
-                                      {'snobjid': 1,'fmtstr':1})
+    link_set = g.oc.find({'snobjid':{'$in':snobjids}}, 
+                         {'snobjid': 1,'fmtstr':1})
     links = list(link_set)
     return links
 
@@ -100,17 +101,15 @@ def set_object_label():
     action_type = request.form.get('action') # look, click
 
     app.logger.debug('set_object_label triggered for SNOBJID %d!' % snobjid)
-    scan_collection = getattr(g.db,
-                              config.MONGODB_SCAN_COLLECTION_NAME)
 
     if action_type == 'look':
-        scan_collection.update({'snobjid':snobjid}, {'$set':{'label':'Bogus'}})
+        g.sc.update({'snobjid':snobjid}, {'$set':{'label':'Bogus'}})
         
     elif action_type == 'click':
-        current_label = scan_collection.find_one({'snobjid':snobjid})['label']
-        scan_collection.update({'snobjid':snobjid}, 
-                               {'$set':{'label':'Real' if 
-                                        current_label == 'Bogus' else 'Bogus'}})
+        current_label = g.sc.find_one({'snobjid':snobjid})['label']
+        g.sc.update({'snobjid':snobjid}, 
+                    {'$set':{'label':'Real' if 
+                             current_label == 'Bogus' else 'Bogus'}})
     app.logger.debug('Updated database with %s, %d rows affected.' % (action_type, 
                                                                       g.db.command('getLastError')['n']))
     return jsonify(success=True)
@@ -124,9 +123,8 @@ def ajax_fetch():
     that indicates whether objects were found."""
     
     app.logger.debug('Entering ajax_fetch!')
-    scan_collection = getattr(g.db,
-                              config.MONGODB_SCAN_COLLECTION_NAME)
-    has_data = (scan_collection.find({'label':None}).count() > 0)
+
+    has_data = (g.sc.find({'label':None}).count() > 0)
     links = fetch()
     html = render_template("content.html", links=links)
     response = jsonify(has_data=has_data,
