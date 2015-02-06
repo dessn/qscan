@@ -42,7 +42,7 @@ jQuery(document).ready(function() {
 		    var snobjid = el.find('h3').first().clone().children().remove().end().text();
 		    $.post($SCRIPT_ROOT + '/set_object_label',
 			   {snobjid:snobjid,
-				   action_type:'look'},
+				   action:'look'},
 			   function(){
 			       console.log('you looked at ' + snobjid);
 			   });
