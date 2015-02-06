@@ -37,7 +37,7 @@ jQuery(document).ready(function() {
 	}    
 	function onVisibilityChange (el, callback) {
 	    return function () {
-		if (!el.data('viewed')){
+		if (!el.data('viewed') && isElementInViewport(el.get()[0])){
 		    el.data('viewed', true);
 		    var snobjid = el.find('h3').first().clone().children().remove().end().text();
 		    $.post($SCRIPT_ROOT + '/set_object_label',
@@ -62,10 +62,10 @@ jQuery(document).ready(function() {
 			      .fadeIn(999,
 				      function(){
 					  $('.object-frame.new').each(function(){
-						  $this = $(this);
+						  var $this = $(this);
 						  $this.imagesLoaded(function(){
 							  var handler = onVisibilityChange($this);
-							  $(window).on('DOMContentLoaded load resize scroll', handler); 
+							  $(window).on('DOMContentLoaded load resize scroll touchmove', handler); 
 						      });
 					      });
 				      });
@@ -111,7 +111,7 @@ jQuery(document).ready(function() {
 		var snobjid = h3.clone().children().remove().end().text();
 		console.log('clicked on ' + snobjid);
 		var is_saved = $(this).hasClass('panel-success');
-		$this = $(this);
+		var $this = $(this);
     
 		console.log('starting post request for ' + snobjid);
 		$.post($SCRIPT_ROOT + '/set_object_label',
