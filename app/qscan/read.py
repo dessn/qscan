@@ -144,8 +144,8 @@ if __name__ == '__main__':
                          names=True,
                          dtype=None)
 
-    print logging.debug('number of entries in data: %d' % len(data))
-    print logging.debug('number of unique entries in data: %d' % len(np.unique(data)))
+    logging.debug('number of entries in data: %d' % len(data))
+    logging.debug('number of unique entries in data: %d' % len(np.unique(data)))
 
     # Shuffle it.
     np.random.shuffle(data)
