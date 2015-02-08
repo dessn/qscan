@@ -18,12 +18,24 @@ def summarize(sc):
                     sc.count()))
     logging.info('%d of them are currently unviewed (label=None).'\
                  % sc.find({'label':None}).count())
-    logging.info('%d of them are currently viewed but unsubmitted (label=0).'\
-                 % sc.find({'label':0}).count())
+    logging.info('%d of them are currently missing (label=Missing).'\
+                 % sc.find({'label':'Missing'}).count())
     logging.info('%d of them are currently labelled junk (label=Bogus).'\
                  % sc.find({'label':'Bogus'}).count())
     logging.info('%d of them are currently saved (label=Real).'\
                  % sc.find({'label':'Real'}).count())
+
+    dups = sc.aggregate([
+        { '$group': {
+        '_id': { 'snobjid': "$snobjid"},
+        'uniqueIds': { '$addToSet': "$_id" },
+        'count': { '$sum': 1 }
+          }},
+        { '$match': {
+        'count': { '$gt': 1 }
+          }}
+        ])
+    logging.info('dups: %s' % dups)
 
 def reset_scan(sc):
     logging.info("Resetting 'label' fields of all relevant %s documents "\
