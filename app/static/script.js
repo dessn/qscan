@@ -1,4 +1,4 @@
-************************
+/************************
 qscan jQuery
 
 * infinite scroll for
