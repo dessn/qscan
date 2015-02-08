@@ -14,7 +14,7 @@ import logging
 import pymongo 
 from qscan import config 
 from flask.ext.bootstrap import Bootstrap
-from flask import Flask, g, render_template, request, jsonify
+from flask import Flask, g, render_template, request, jsonify, url_for
 
 # Application Creation + Configuration
 
@@ -76,15 +76,14 @@ def fetch(exclude=None, n_fetch=24):
 
     app.logger.debug('Fetching %d unscanned objects.' % n_fetch)
     new_objects = g.c.find({'label':None,
-                            'snobjid':{'$nin':exclude}}).limit(n_fetch)
+                            'snobjid':{'$nin':exclude}},
+                           {'snobjid':1, 'fmtstr':1}).limit(n_fetch)
+    links = list(new_objects)
     
     # Links to the images of the objects are loaded
-    snobjids = [ob['snobjid'] for ob in new_objects]
+    snobjids = [ob['snobjid'] for ob in links]
     app.logger.info('Fetched snobjids: %s.' % snobjids)
 
-    link_set = g.c.find({'snobjid':{'$in':snobjids}}, 
-                        {'snobjid': 1,'fmtstr':1})
-    links = list(link_set)
     return links
 
 @app.route("/")
@@ -100,18 +99,23 @@ def submit():
 
     save = map(int, request.form.getlist('save[]'))
     junk = map(int, request.form.getlist('junk[]'))
+    missing = map(int, request.form.getlist('missing[]'))
 
     app.logger.debug('submitted JUNK snobjids: %s' % junk)
     app.logger.debug('submitted SAVE snobjids: %s' % save)
+    app.logger.debug('submitted MISSING snobjids: %s' % missing)
 
-
-    g.c.update({'snobjid':{'$in':save}, {'$set':{'label':'Real'}}},
+    g.c.update({'snobjid':{'$in':save}}, {'$set':{'label':'Real'}},
                multi=True)
-    app.logger.debug('Updated database, %d rows affected.' % g.db.command('getLastError')['n'])
+    app.logger.debug('Updated database, %d rows affected. (REAL)' % g.db.command('getLastError')['n'])
         
-    g.c.update({'snobjid':{'$in':junk}, {'$set':{'label':'Bogus'}}},
+    g.c.update({'snobjid':{'$in':junk}}, {'$set':{'label':'Bogus'}},
                multi=True)
-    app.logger.debug('Updated database, %d rows affected.' % g.db.command('getLastError')['n'])
+    app.logger.debug('Updated database, %d rows affected. (BOGUS)' % g.db.command('getLastError')['n'])
+
+    g.c.update({'snobjid':{'$in':missing}}, {'$set':{'label':'Missing'}},
+               multi=True)
+    app.logger.debug('Updated database, %d rows affected. (MISSING)' % g.db.command('getLastError')['n'])
     
     return jsonify(success=True)
 
@@ -121,11 +125,12 @@ def ajax_fetch():
     with two fields: html and has_data. `html` is the formatted HTML to
     append to the DOM of the app's index page. has_data indicates whether
     or not the html contains any new objects, or if it is just a panel 
-    that indicates whether objects were found."""
+    that indicates that no objects were found."""
 
-    exlude = map(int, request.form.getlist('exclude[]'))
+    exclude = map(int, request.form.getlist('exclude[]'))
     
     app.logger.debug('Entering ajax_fetch!')
+    app.logger.debug('Asked to exclude: %s' % exclude)
 
     has_data = (g.c.find({'label':None}).count() > 0)
     links = fetch(exclude=exclude)
@@ -133,7 +138,7 @@ def ajax_fetch():
     response = jsonify(has_data=has_data,
                        html=html,
                        numnew=len(links))
-    app.logger.debug('ajax_fetch returning: %s' % response.data)
+    app.logger.debug('Ajax fetch has data: %s' % has_data)
     return response
 
 @app.route("/render_done", methods=["POST"])
@@ -145,12 +150,24 @@ def done():
     app.logger.debug('scanning session complete.')
     numsaved = int(request.form['numsaved'])
     numignored = int(request.form['numignored'])
-    numobs = numsaved + numignored
+    nummissing = int(request.form['nummissing'])
+    numobs = numsaved + numignored + nummissing
+
     return render_template('done.html', 
                            numsaved=numsaved,
                            numignored=numignored,
-                           numobs=numobs)
-    
+                           numobs=numobs,
+                           nummissing=nummissing)
+
+@app.route('/buttons')
+def buttons():
+    """Return HTML for bottom-of-page buttons."""
+    return render_template('buttons.html')
+
+@app.route('/missing')
+def missing():
+    """Return link to missing placeholder image."""
+    return url_for('static', filename='logo_DES.jpg')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=25981)
