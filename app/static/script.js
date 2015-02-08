@@ -33,7 +33,7 @@ jQuery(document).ready(function() {
                            numignored:numignored},
                    function(html){
                        $('#scroll-container').append(html).fadeIn('slow');
-                       #('#submit-btn').prop('disabled',true);
+                       $('#submit-btn').prop('disabled',true);
                        $('html, body').animate({ scrollTop: $(document).height()}, "slow");
                    });            
         }        
