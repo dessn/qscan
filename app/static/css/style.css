@@ -9,11 +9,11 @@ body {
     background-color: #EEEEEE;
 }
 
-.object-frame {
+.object-frame:not(.panel-warning) {
     transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
 }
 
-.object-frame:hover {
+.object-frame:hover:not(.panel-warning) {
     border-color: #66AFE9;
     box-shadow: 0 1px 1px rgba(0, 0, 0, 0.075) inset, 0 0 8px rgba(102, 175, 233, 0.6);
     outline: 0 none;
