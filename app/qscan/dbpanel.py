@@ -10,17 +10,11 @@ import config
 import pymongo
 import logging
 from argparse import ArgumentParser
-
-def summarize_object(oc):
-    logging.info('*%s*' % config.MONGODB_OBJECT_COLLECTION_NAME)
-    logging.info('%s currently has %d documents.' \
-                 % (config.MONGODB_OBJECT_COLLECTION_NAME,
-                    oc.count()))
     
-def summarize_scan(sc):
-    logging.info('*%s*' % config.MONGODB_SCAN_COLLECTION_NAME)
+def summarize(sc):
+    logging.info('*%s*' % config.MONGODB_COLLECTION_NAME)
     logging.info('%s currently has %d documents.' \
-                 % (config.MONGODB_SCAN_COLLECTION_NAME,
+                 % (config.MONGODB_COLLECTION_NAME,
                     sc.count()))
     logging.info('%d of them are currently unviewed (label=None).'\
                  % sc.find({'label':None}).count())
@@ -34,7 +28,7 @@ def summarize_scan(sc):
 def reset_scan(sc):
     logging.info("Resetting 'label' fields of all relevant %s documents "\
                  "to `unviewed`..." \
-                 % config.MONGODB_SCAN_COLLECTION_NAME)
+                 % config.MONGODB_COLLECTION_NAME)
     sc.update({'label':{'$ne':None}}, {'$set':{'label':None}}, multi=True)
     logging.info('%d rows affected.' % \
                  db.command('getLastError')['n'])
@@ -68,29 +62,18 @@ if __name__ == '__main__':
 
     # Object collection
 
-    logging.debug('Binding the object collection...')
+    logging.debug('Binding the collection...')
     oc = getattr(db,
-                 config.MONGODB_OBJECT_COLLECTION_NAME)
-    logging.debug('Object collection bound.')
-    
-    # Scan collection
-
-    logging.debug('Binding the scanning collection...')
-    sc = getattr(db,
-                 config.MONGODB_SCAN_COLLECTION_NAME)
-    logging.debug('Scanning collection bound.')
+                 config.MONGODB_COLLECTION_NAME)
+    logging.debug('Collection bound.')
 
     # Summarize object collection:
 
-    summarize_object(oc)
+    summarize(oc)
     
-    # Summarize scan collection:
-
-    summarize_scan(sc)
-
     # Reset scanning decisions
     
     if args.rs:
-        reset_scan(sc)
-        summarize_scan(sc)
+        reset_scan(oc)
+        summarize(oc)
         
