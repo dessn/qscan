@@ -144,6 +144,9 @@ if __name__ == '__main__':
                          names=True,
                          dtype=None)
 
+    print logging.debug('number of entries in data: %d' % len(data))
+    print logging.debug('number of unique entries in data: %d' % len(np.unique(data)))
+
     # Shuffle it.
     np.random.shuffle(data)
 
@@ -158,9 +161,23 @@ if __name__ == '__main__':
 
     # Partition the data array.
     splseq = _split(data, args.njobs)
+
+    """
+    snobjids = [d['SNOBJID'] for d in splseq]
+
+    def intersect_recursively(iterable):
+        if len(iterable) == 2:
+            return np.intersect1d(*iterable)
+        else:
+            intersection = np.intersect1d(*iterable[:2])
+            return intersect_recursively([intersection] + iterable[2:])
+
+    logging.debug('Are there set-wise duplicates?  %s' % intersect_recursively(snobjids))
+    """
             
     # Do business. 
     dicts = list(chain(*p.map(run, splseq)))
     collection.insert(dicts)
     logging.info('Successfully transferred %d records from NCSA to NERSC.' % len(dicts))
+    logging.info('But the number of UNIQUE records was %d.' % len(set([d['snobjid'] for d in dicts])))
 

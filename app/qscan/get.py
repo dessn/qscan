@@ -29,7 +29,7 @@ if __name__ == '__main__':
                       and (c.ra + (:tol / COS(c.dec *
                       :pi / 180.))) and o.dec between (c.dec -
                       :tol) and (c.dec + :tol) where
-                      c.snfake_id = 0 and c.numepochs >= 2 and
+                      c.snfake_id = 0 and c.numepochs >= 2 and c.cand_type >= 0 and
                       o.snfake_id = 0 ORDER BY DBMS_RANDOM.VALUE""")
 
     oracle_dbi.execute(query, tol=tol, pi=pi)
