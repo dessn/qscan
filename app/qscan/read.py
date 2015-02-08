@@ -161,19 +161,6 @@ if __name__ == '__main__':
 
     # Partition the data array.
     splseq = _split(data, args.njobs)
-
-    """
-    snobjids = [d['SNOBJID'] for d in splseq]
-
-    def intersect_recursively(iterable):
-        if len(iterable) == 2:
-            return np.intersect1d(*iterable)
-        else:
-            intersection = np.intersect1d(*iterable[:2])
-            return intersect_recursively([intersection] + iterable[2:])
-
-    logging.debug('Are there set-wise duplicates?  %s' % intersect_recursively(snobjids))
-    """
             
     # Do business. 
     dicts = list(chain(*p.map(run, splseq)))
