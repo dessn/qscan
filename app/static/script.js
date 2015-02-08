@@ -38,7 +38,7 @@ jQuery(document).ready(function() {
                    });            
         }        
         
-        functon get_snobjids(el){
+        function get_snobjids(el){
             el.find('h3').each(function(){
                     return $(this).clone().children().remove().end().text();
                 });
