@@ -1,4 +1,4 @@
-/************************
+************************
 qscan jQuery
 
 * infinite scroll for
@@ -17,90 +17,75 @@ jQuery(document).ready(function() {
 	$(window).on('beforeunload', function() {
 		$(window).scrollTop(0);
 	    });
-  
 
-	function isElementInViewport (el) {
 
-	    //special bonus for those using jQuery
-	    if (typeof jQuery === "function" && el instanceof jQuery) {
-		el = el[0];
-	    }
-    
-	    var rect = el.getBoundingClientRect();
-    
-	    return (
-		    rect.top >= 0 &&
-		    rect.left >= 0 &&
-		    rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && 
-		    rect.right <= (window.innerWidth || document.documentElement.clientWidth) 
-		    );
-	}    
-	function onVisibilityChange (el, callback) {
-	    return function () {
-		if (!el.data('viewed') && isElementInViewport(el.get()[0])){
-		    el.data('viewed', true);
-		    var snobjid = el.find('h3').first().clone().children().remove().end().text();
-		    $.post($SCRIPT_ROOT + '/set_object_label',
-			   {snobjid:snobjid,
-				   action:'look'},
-			   function(){
-			       console.log('you looked at ' + snobjid);
-			   });
-		}
-	    };
-	}
-	    
+	// When there are no objects left on the server, cease all AJAX
+	// calls to fetch new objects by toggling the fetchobjects
+	// variable.
+        
+
+        function submit_callback(){
+            var numsaved = $('.object-frame.panel-success').length;
+            var numignored = $('.object-frame.panel-default').length;
+            $('#loadmore-btn').prop('disabled', true);
+            $.post($SCRIPT_ROOT + '/render_done',
+                   {numsaved:numsaved,
+                           numignored:numignored},
+                   function(html){
+                       $('#scroll-container').append(html).fadeIn('slow');
+                       #('#submit-btn').prop('disabled',true);
+                       $('html, body').animate({ scrollTop: $(document).height()}, "slow");
+                   });            
+        }        
+        
+        functon get_snobjids(el){
+            el.find('h3').each(function(){
+                    return $(this).clone().children().remove().end().text();
+                });
+        }
+
+        function placeButtons(){
+            $.get($SCRIPT_ROOT + '/buttons.html',
+                  function(html){
+                      $('#button-container').append(html)
+                          .fadeIn(999);
+                      $('#submit-btn').click(function(){
+                              $.post($SCRIPT_ROOT + '/submit',
+                                     {save:get_snobjids($('.object-frame.panel-success')),
+                                             junk:get_snobjids($('.object-frame.panel-default'))},
+                                     submit_callback
+                                     );
+                          });
+                      $('#loadmore-btn').click(function(){
+                              $('#loader').fadeIn('slow', function(){
+                                      fetchScanObjectsAjax();
+                                  });
+                              $('#loader').fadeOut('slow');
+                          });
+                  });
+        }
+        
 	function fetchScanObjectsAjax(){
-	    $('.object-frame.new').toggleClass('new');
 	    $.getJSON($SCRIPT_ROOT + '/fetch_more',
 		      function(json){
 			  fetchobjects  = json.has_data;
 			  var html      = json.html;
 			  var numnew    = json.numnew;
-                
+                          
 			  $('#scroll-container').append(html)
-			      .fadeIn(999,
-				      function(){
-					  $('.object-frame.new').each(function(){
-						  var $this = $(this);
-						  $this.imagesLoaded(function(){
-							  var handler = onVisibilityChange($this);
-							  $(window).on('DOMContentLoaded load resize scroll touchmove', handler); 
-						      });
-					      });
-				      });
-		      });
+			      .fadeIn(999);
+                      });
 	}
 	
 
-	// When there are no objects left on the server, cease all AJAX
-	// calls to fetch new objects by toggling the fetchobjects
-	// variable.
-
-	var fetchobjects = true;
 
 	// Set up the page with an initial fetch.
   
 	fetchScanObjectsAjax();
 
-	// When you hit the bottom of the page, load more crap to scan.
-	// The 'ajaxready' variable prevents multiple AJAX calls from
-	// being launched from a single bottom-hit.
-
-	$(window).data('ajaxready', true);
-	$(window).scroll(function(e){
-		if (!$(window).data('ajaxready') || !fetchobjects) return;
-		if ($(window).scrollTop() + $(window).height() >= $(document).height() - 300){
-		    console.log("Reached the bottom of the page!");
-		    $(window).data('ajaxready', false);
-		    $('#loader').fadeIn('slow', function(){
-			    fetchScanObjectsAjax();
-			});
-		    $('#loader').fadeOut('slow', function(){
-			    $(window).data('ajaxready', true);
-			});
-		}
-	    });
+        // Also add the buttons.
+        
+        placeButtons();
 
 	// When someone clicks a panel, turn it on / off in the browser
 	// and on the backend.
