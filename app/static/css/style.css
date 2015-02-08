@@ -9,14 +9,6 @@ body {
     background-color: #EEEEEE;
 }
 
-div.collapse.in ul li{
-    padding-right: 15px;
-}
-
-div.collapsing ul li{
-    padding-right: 15px;
-}
-
 .object-frame {
     transition: border-color 0.15s ease-in-out 0s, box-shadow 0.15s ease-in-out 0s;
 }
