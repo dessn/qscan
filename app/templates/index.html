@@ -19,6 +19,8 @@
 <div class="container">
   <div id="scroll-container" class="row">
   </div> 
+  <div id="button-container" class="row" style="text-align:center">
+  </div>
 </div>
     
 {% endblock %}
@@ -28,6 +30,5 @@
   <script type="text/javascript">
     $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
   </script>
-  <script src="{{ url_for( 'static', filename='imagesloaded.pkgd.min.js' )}}"></script>
   <script src="{{ url_for( 'static', filename='script.js' ) }}"></script>
 {% endblock %}
