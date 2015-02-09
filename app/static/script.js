@@ -102,7 +102,7 @@ jQuery(document).ready(function() {
 	    $.post($SCRIPT_ROOT + '/fetch_more',
                    {exclude:exclude},
                    function(json){
-                       var done      = json.has_data;
+                       var done      = !json.has_data;
                        var html      = json.html;
                        var numnew    = json.numnew;
                        
@@ -120,14 +120,15 @@ jQuery(document).ready(function() {
 	}
 	
 
+        // Also add the buttons.
+        
+        placeButtons();
+
 
 	// Set up the page with an initial fetch.
   
 	fetchScanObjectsAjax([]);
 
-        // Also add the buttons.
-        
-        placeButtons();
 
 	// When someone clicks a panel, turn it on / off in the browser
 	// and on the backend.
