@@ -56,7 +56,7 @@ jQuery(document).ready(function() {
                        $('#submitbadge').remove();
                        $('html, body').animate({ scrollTop: $(document).height()}, "slow");
                        $('#scroll-container').off('click', '.object-frame');
-                       $('.object-frame').addClass('setinstone');
+                       $('.object-frame').addClass('setinstone').css('cursor', 'hover:default');
                    });            
         }        
         
