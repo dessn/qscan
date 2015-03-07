@@ -23,14 +23,14 @@ if __name__ == '__main__':
 
     oracle_dbi = cx_Oracle.connect(config.ORACLE_URI).cursor()
     query = dedent("""select o.snobjid, c.snid, c.numepochs, 
-                      c.numepochs_ml from snobs o
-                      join sncand c on o.ra between (c.ra -
+                      c.numepochs_ml from sny1reproc.snobs o
+                      join sny1reproc.sncand c on o.ra between (c.ra -
                       (:tol / COS(c.dec * :pi / 180.)))
                       and (c.ra + (:tol / COS(c.dec *
                       :pi / 180.))) and o.dec between (c.dec -
                       :tol) and (c.dec + :tol) where
                       c.snfake_id = 0 and c.numepochs >= 2 and c.cand_type >= 0 and
-                      o.snfake_id = 0 ORDER BY DBMS_RANDOM.VALUE""")
+                      o.snfake_id = 0""")
 
     oracle_dbi.execute(query, tol=tol, pi=pi)
     result = oracle_dbi.fetchall()

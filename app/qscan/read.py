@@ -14,7 +14,7 @@ from argparse import ArgumentParser
 import multiprocessing as mp
 from itertools import chain
 
-ml_version = 2
+ml_version = 3
 colnames = ['snobjid', 'expnum', 'nite', 'mjd',
             'field', 'ccdnum', 'band', 'seqnum',
             'reqnum', 'attnum', 'ml_score', 'ml_version']
