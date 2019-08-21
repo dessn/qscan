@@ -9,7 +9,7 @@ MongoAlchemy==0.19
 SOAPpy==0.12.5
 SQLAlchemy==0.9.8
 WTForms==2.0.2
-Werkzeug==0.9.6
+Werkzeug==0.15.3
 backports.ssl-match-hostname==3.4.0.2
 certifi==14.05.14
 cx-Oracle==5.1.3
